@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="zh-Hant-TW">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -35,7 +35,7 @@
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-sans);font-size:15.5px;line-height:1.65;-webkit-font-smoothing:antialiased}
-html:not([data-lang]) .en,html[data-lang="zh"] .en{display:none!important}
+html:not([data-lang]) .zh,html[data-lang="zh"] .en{display:none!important}
 html[data-lang="en"] .zh{display:none!important}
 a{color:var(--tmu)}
 button{font-family:inherit}
@@ -291,8 +291,8 @@ footer{grid-column:1/-1;text-align:center;color:var(--muted);font-size:12.5px;pa
       <a href="#contact"><span class="zh">聯絡</span><span class="en">Contact</span></a>
     </nav>
     <div class="lang" role="group" aria-label="Language">
-      <button type="button" id="btn-zh" data-set="zh" aria-pressed="true">中</button>
-      <button type="button" id="btn-en" data-set="en" aria-pressed="false">EN</button>
+      <button type="button" id="btn-zh" data-set="zh" aria-pressed="false">中</button>
+      <button type="button" id="btn-en" data-set="en" aria-pressed="true">EN</button>
     </div>
   </div>
 </header>
@@ -549,8 +549,8 @@ var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').mat
 /* language */
 function setLang(l){root.setAttribute('data-lang',l);root.lang=l==='zh'?'zh-Hant-TW':'en';
   document.querySelectorAll('.lang button').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.set===l));});
-  store('gh-lang',l);renderSubject();}
-document.querySelectorAll('.lang button').forEach(function(b){b.onclick=function(){setLang(b.dataset.set);};});
+  renderSubject();}
+document.querySelectorAll('.lang button').forEach(function(b){b.onclick=function(){setLang(b.dataset.set);store('gh-lang-v2',b.dataset.set);};});
 
 /* toast */
 var tt;function toast(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(function(){t.classList.remove('show');},1700);}
@@ -732,7 +732,7 @@ ban.addEventListener('pointermove',function(e){var r=cv.getBoundingClientRect();
 ban.addEventListener('pointerleave',function(){mouse.x=mouse.y=-999;if(reduce)draw();});
 
 /* init lang */
-var init=store('gh-lang');if(init!=='en')init='zh';if(location.hash==='#en')init='en';setLang(init);
+var init=store('gh-lang-v2');if(init!=='zh')init='en';if(location.hash==='#zh')init='zh';if(location.hash==='#en')init='en';setLang(init);
 })();
 </script>
 
