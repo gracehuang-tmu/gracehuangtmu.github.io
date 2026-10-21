@@ -257,6 +257,7 @@ p{margin:0}
 .langs div{display:flex;justify-content:space-between;font-size:14px;padding:3px 0}
 .langs span{color:var(--muted);font-size:13px}
 footer{grid-column:1/-1;text-align:center;color:var(--muted);font-size:12.5px;padding-top:8px}
+footer .vc b{font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
 
 .toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 24px);transform:translate(-50%,20px);background:var(--ink);color:var(--card);padding:10px 18px;border-radius:8px;font-size:14px;font-weight:600;opacity:0;transition:.25s;pointer-events:none;z-index:50}
 .toast.show{opacity:1;transform:translate(-50%,0)}
@@ -560,7 +561,8 @@ footer{grid-column:1/-1;text-align:center;color:var(--muted);font-size:12.5px;pa
   </section>
 </aside>
 
-<footer><span class="zh">© 2026 黃芝瑋 ・ 最後更新 2026 年 10 月</span><span class="en">© 2026 Chih-Wei (Grace) Huang · Updated October 2026</span></footer>
+<footer><span class="zh">© 2026 黃芝瑋 ・ 最後更新 2026 年 10 月</span><span class="en">© 2026 Chih-Wei (Grace) Huang · Updated October 2026</span><span id="busuanzi_container_site_uv" class="vc" style="display:none"> · <span class="zh">訪客 </span><span class="en">Visitors </span><b id="busuanzi_value_site_uv"></b></span><span id="busuanzi_container_site_pv" class="vc" style="display:none"> · <span class="zh">瀏覽次數 </span><span class="en">Page views </span><b id="busuanzi_value_site_pv"></b></span></footer>
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 </div>
 <div class="toast" id="toast" role="status"></div>
 <div class="lb" id="lb" hidden role="dialog" aria-modal="true"><button type="button" id="lbClose" aria-label="Close">×</button><figure><img id="lbImg" alt=""><figcaption id="lbCap"></figcaption></figure></div>
