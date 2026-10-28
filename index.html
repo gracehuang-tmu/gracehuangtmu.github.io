@@ -502,7 +502,7 @@ footer .vc b{font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
       <button type="button" class="chip" aria-pressed="false" data-t="col"><span class="zh">合作夥伴</span><span class="en">Collaborators</span></button>
     </div>
     <div class="people" id="t-stu"></div>
-    <div class="people" id="t-int" hidden></div>
+    <div id="t-int" hidden><div class="gfilter" id="intFilter" aria-label="Program"></div><div class="people" id="intList"></div></div>
     <div id="t-col" hidden>
       <h3 class="subh"><span class="zh">國際合作</span><span class="en">International</span></h3>
       <div class="people" id="colList"></div>
@@ -725,8 +725,14 @@ $('pubMore').onclick=function(){pubAll=!pubAll;pubRender();};
 /* people + collaborators + partners */
 function personCard(r){var cur=r.status==='current',stu=r.type==='student';var u=safeUrl(r.link);var nm=esc(r.name)+(r.name_en&&r.name_en!==r.name?' <small>'+esc(r.name_en)+'</small>':'');
  var ph=imgUrl(r.photo,400);return '<div class="person">'+(ph?'<button type="button" class="pav has-img" data-full="'+imgUrl(r.photo,1600)+'" data-cap="'+encodeURIComponent('<b>'+esc(r.name)+'</b>')+'" aria-label="'+esc(r.name)+'"><img src="'+ph+'" alt="'+esc(r.name)+'" loading="lazy"></button>':'<div class="pav">'+esc(initials(r.name))+'</div>')+'<div class="pbody2"><div class="pname">'+(u?'<a href="'+u+'" target="_blank" rel="noopener" style="color:inherit">'+nm+'</a>':nm)+'</div><div class="t3">'+bil(r.affiliation_zh,r.affiliation_en)+'</div>'+(r.topic_zh?'<div class="t2s">'+bil(r.topic_zh,r.topic_en)+'</div>':'')+(r.note_zh?'<div class="pnote">'+bil(r.note_zh,r.note_en)+'</div>':'')+'</div><span class="pstate '+(cur?'now':'alum')+'">'+(cur?bi('現任','Current'):(stu?bi('校友','Alumni'):bi('歷屆','Past')))+'</span></div>';}
+var intAll=[],intProg='all',PROG={TEEP:{zh:'TEEP',en:'TEEP'},IIPP:{zh:'IIPP',en:'IIPP'},NSPES:{zh:'新南向菁英（NSPES）',en:'NSPES'}};
+function progs(r){var m=String((r.topic_en||'')+' '+(r.topic_zh||'')).match(/TEEP|IIPP|NSPES/g)||[];return m.filter(function(x,i){return m.indexOf(x)===i;});}
+function rInterns(){var cnt={};intAll.forEach(function(r){progs(r).forEach(function(p){cnt[p]=(cnt[p]||0)+1;});});if(intProg!=='all'&&!cnt[intProg])intProg='all';
+ $('intFilter').innerHTML='<button type="button" class="chip" data-p="all" aria-pressed="'+(intProg==='all')+'">'+bi('全部','All')+' <span class="n">'+intAll.length+'</span></button>'+Object.keys(PROG).filter(function(p){return cnt[p];}).map(function(p){return '<button type="button" class="chip" data-p="'+p+'" aria-pressed="'+(intProg===p)+'">'+bi(PROG[p].zh,PROG[p].en)+' <span class="n">'+cnt[p]+'</span></button>';}).join('');
+ $('intFilter').querySelectorAll('.chip').forEach(function(b){b.onclick=function(){intProg=b.dataset.p;rInterns();};});
+ $('intList').innerHTML=intAll.filter(function(r){return intProg==='all'||progs(r).indexOf(intProg)>=0;}).map(personCard).join('');zoomables($('intList'));}
 function rPeople(){var P=DATA.people.filter(shown);var s=P.filter(function(r){return r.type==='student';}),t=P.filter(function(r){return r.type==='intern';});
- $('t-stu').innerHTML=s.map(personCard).join('');$('t-int').innerHTML=t.map(personCard).join('');zoomables($('t-stu'));zoomables($('t-int'));$('nStu').textContent=s.length;$('nInt').textContent=t.length;
+ $('t-stu').innerHTML=s.map(personCard).join('');intAll=t;rInterns();zoomables($('t-stu'));$('nStu').textContent=s.length;$('nInt').textContent=t.length;
  $('colList').innerHTML=DATA.collaborators.filter(shown).map(function(r){var u=safeUrl(r.link);return '<div class="person"><div class="pav org">'+esc(r.badge||initials(r.organization))+'</div><div class="pbody2"><div class="pname">'+(u?'<a href="'+u+'" target="_blank" rel="noopener" style="color:inherit">'+esc(r.organization)+'</a>':esc(r.organization))+'</div><div class="t3">'+bil(r.contact_zh,r.contact_en)+'</div><div class="t2s">'+bil(r.topic_zh,r.topic_en)+'</div></div></div>';}).join('');
  var pt=DATA.partners.filter(shown);function cloud(k){return pt.filter(function(r){return r.kind===k;}).map(function(r){return '<span>'+esc(r.name)+'</span>';}).join('');}
  $('clinList').innerHTML=cloud('clinical');$('indList').innerHTML=cloud('industry');}
