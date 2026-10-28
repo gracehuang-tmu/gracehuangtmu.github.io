@@ -606,8 +606,12 @@ footer .vc b{font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
   </section>
 </aside>
 
-<footer><span class="zh">© 2026 黃芝瑋 ・ 最後更新 2026 年 10 月</span><span class="en">© 2026 Chih-Wei (Grace) Huang · Updated October 2026</span><span id="busuanzi_container_site_uv" class="vc" style="display:none"> · <span class="zh">訪客 </span><span class="en">Visitors </span><b id="busuanzi_value_site_uv"></b></span><span id="busuanzi_container_site_pv" class="vc" style="display:none"> · <span class="zh">瀏覽次數 </span><span class="en">Page views </span><b id="busuanzi_value_site_pv"></b></span></footer>
-<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<footer><span class="zh">© 2026 黃芝瑋 ・ 最後更新 2026 年 10 月</span><span class="en">© 2026 Chih-Wei (Grace) Huang · Updated October 2026</span><span id="gcWrap" class="vc" hidden> · <span class="zh">訪客 </span><span class="en">Visitors </span><b id="gcCount"></b></span></footer>
+<script data-goatcounter="https://gracehuang.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+<script>
+(function(){if(location.protocol!=='https:')return;
+ fetch('https://gracehuang.goatcounter.com/counter/TOTAL.json').then(function(r){if(!r.ok)throw 0;return r.json();}).then(function(d){if(!d||!d.count)return;document.getElementById('gcCount').textContent=d.count;document.getElementById('gcWrap').hidden=false;}).catch(function(){});})();
+</script>
 </div>
 <div class="toast" id="toast" role="status"></div>
 <div class="lb" id="lb" hidden role="dialog" aria-modal="true"><button type="button" id="lbClose" aria-label="Close">×</button><figure><img id="lbImg" alt=""><figcaption id="lbCap"></figcaption></figure></div>
