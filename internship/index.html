@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="International research internship (TEEP) in digital health and medical AI with Dr. Chih-Wei (Grace) Huang, Taipei Medical University. Eligibility, research areas, scholarship and how to apply.">
+<meta property="og:title" content="Research Internship | Grace Huang Lab, Taipei Medical University">
+<meta property="og:description" content="Join our TEEP internship in digital health and AI for chronic disease care. NT$20,000/month scholarship, minimum 2 months.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="../photo.jpg">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231D5FB4'/%3E%3Cg stroke='%23fff' stroke-width='3' stroke-linecap='round' opacity='.9'%3E%3Cpath d='M32 32L32 13M32 32L50 26M32 32L44 48M32 32L20 48M32 32L14 26'/%3E%3C/g%3E%3Cg fill='%23fff'%3E%3Ccircle cx='32' cy='13' r='4.2'/%3E%3Ccircle cx='50' cy='26' r='4.2'/%3E%3Ccircle cx='44' cy='48' r='4.2'/%3E%3Ccircle cx='20' cy='48' r='4.2'/%3E%3Ccircle cx='14' cy='26' r='4.2'/%3E%3C/g%3E%3Ccircle cx='32' cy='32' r='7' fill='%23FFE296'/%3E%3C/svg%3E">
+<title>Research Internship | Grace Huang Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=Noto+Sans+TC:wght@400;500;700;900&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#EEF2F7; --card:#FFFFFF; --ink:#15202E; --muted:#5A6779; --line:#DCE3EC; --hover:#F3F6FA;
+  --tmu:#1D5FB4; --tmu-deep:#123E78; --tmu-soft:#E3ECF8; --gold:#B38A2E; --on-tmu:#FFFFFF;
+  --banner-a:#123E78; --banner-b:#2F74C9;
+  --f-sans:"Source Sans 3","Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0B111C; --card:#131C2B; --ink:#E4EAF3; --muted:#97A5B8; --line:#243145; --hover:#1A2537;
+  --tmu:#6EA6EE; --tmu-deep:#A9C9F6; --tmu-soft:#172A45; --gold:#D9B45E; --on-tmu:#0A1628;
+  --banner-a:#0A1E3D; --banner-b:#174A8C; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0B111C; --card:#131C2B; --ink:#E4EAF3; --muted:#97A5B8; --line:#243145; --hover:#1A2537;
+  --tmu:#6EA6EE; --tmu-deep:#A9C9F6; --tmu-soft:#172A45; --gold:#D9B45E; --on-tmu:#0A1628;
+  --banner-a:#0A1E3D; --banner-b:#174A8C; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-sans);font-size:15.5px;line-height:1.65;-webkit-font-smoothing:antialiased}
+html:not([data-lang]) .zh,html[data-lang="zh"] .en{display:none!important}
+html[data-lang="en"] .zh{display:none!important}
+a{color:var(--tmu)}
+button{font-family:inherit}
+:focus-visible{outline:2px solid var(--tmu);outline-offset:2px;border-radius:6px}
+h1,h2,h3{margin:0;text-wrap:balance}
+p{margin:0}
+ul{margin:0;padding-left:1.2em}
+li+li{margin-top:4px}
+
+.topbar{position:sticky;top:0;z-index:20;background:var(--card);border-bottom:1px solid var(--line)}
+.topbar-in{max-width:880px;margin:0 auto;padding-inline:16px;display:flex;align-items:center;gap:14px;height:56px}
+.logo{width:34px;height:34px;flex:none;display:block}
+.logo svg{width:100%;height:100%;display:block}
+.back{color:var(--muted);text-decoration:none;font-size:13.5px;font-weight:600;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.back:hover{color:var(--ink)}
+.lang{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:2px;flex:none}
+.lang button{border:0;background:none;color:var(--muted);font-size:12.5px;font-weight:600;padding:4px 11px;border-radius:999px;cursor:pointer}
+.lang button[aria-pressed="true"]{background:var(--tmu);color:var(--on-tmu)}
+
+.page{max-width:880px;margin:0 auto;padding:24px 16px 56px;display:flex;flex-direction:column;gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:22px 24px;scroll-margin-top:72px}
+.card > h2{font-size:20px;font-weight:700;margin-bottom:14px}
+.sub{color:var(--muted);font-size:13.5px}
+
+.hero{padding:0;overflow:hidden}
+.hero-band{background:linear-gradient(120deg,var(--banner-a),var(--banner-b));color:#fff;padding:30px 24px 26px}
+.kicker{font-size:11.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#FFE296}
+.hero h1{font-size:30px;font-weight:900;line-height:1.25;margin-top:8px}
+.hero .lede{margin-top:10px;max-width:40em;color:#FFFFFFE0;font-size:16px}
+.cta{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+.btn{border:1.5px solid var(--tmu);background:var(--card);color:var(--tmu);font-weight:700;font-size:14.5px;padding:7px 18px;border-radius:999px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{background:var(--tmu-soft)}
+.btn.solid{background:var(--tmu);color:var(--on-tmu)}
+.btn.solid:hover{background:var(--tmu-deep);border-color:var(--tmu-deep)}
+.hero .btn{border-color:#fff;background:#fff;color:#123E78}
+.hero .btn:hover{background:#FFE296;border-color:#FFE296}
+.hero .btn.line{background:transparent;color:#fff}
+.hero .btn.line:hover{background:#FFFFFF1F;color:#fff;border-color:#fff}
+
+.facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
+.fact{padding:14px 20px;border-right:1px solid var(--line)}
+.fact:last-child{border-right:0}
+.fact .n{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums}
+.fact .l{font-size:12.5px;color:var(--muted)}
+
+.tracks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.track{border:1px solid var(--line);border-radius:8px;padding:14px 16px}
+.track h3{font-size:15.5px;font-weight:700;display:flex;align-items:center;gap:8px}
+.track .ico{width:26px;height:26px;border-radius:6px;display:grid;place-items:center;background:var(--tmu-soft);color:var(--tmu);flex:none;font-family:var(--f-mono);font-size:12px;font-weight:500}
+.track p{margin-top:6px;color:var(--muted);font-size:14px}
+.track .need{margin-top:8px;font-size:12.5px;color:var(--ink)}
+.track .need b{color:var(--tmu)}
+
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+.two h3{font-size:15px;font-weight:700;margin-bottom:6px}
+
+.steps{list-style:none;padding:0;margin:0;counter-reset:s}
+.steps > li{position:relative;padding:0 0 18px 48px;counter-increment:s}
+.steps > li+li{margin-top:0}
+.steps > li::before{content:counter(s);position:absolute;left:0;top:0;width:32px;height:32px;border-radius:50%;background:var(--tmu);color:var(--on-tmu);display:grid;place-items:center;font-weight:700;font-size:14px}
+.steps > li::after{content:"";position:absolute;left:15px;top:36px;bottom:4px;width:2px;background:var(--line)}
+.steps > li:last-child{padding-bottom:0}
+.steps > li:last-child::after{display:none}
+.steps h3{font-size:16px;font-weight:700;line-height:32px}
+.steps p,.steps ul{margin-top:4px}
+.fill{margin-top:10px;border:1px solid var(--line);border-radius:8px;overflow:hidden;font-size:14px}
+.fill div{display:grid;grid-template-columns:150px 1fr;border-top:1px solid var(--line)}
+.fill div:first-child{border-top:0}
+.fill > div > span{padding:8px 12px}
+.fill > div > span:first-child{background:var(--hover);color:var(--muted);font-weight:600}
+.docs{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;padding:0;list-style:none}
+.docs li{margin:0;border:1px solid var(--line);border-radius:999px;padding:2px 12px;font-size:13px}
+.mrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px;background:var(--hover);border:1px solid var(--line);border-radius:8px;padding:8px 12px;font-size:14px}
+.mrow .val{font-family:var(--f-mono);font-size:13px;flex:1;min-width:0;word-break:break-all}
+.copy{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:6px;font-size:12.5px;font-weight:600;padding:3px 10px;cursor:pointer}
+.copy:hover{border-color:var(--tmu);color:var(--tmu)}
+
+.terms{width:100%;border-collapse:collapse;font-size:14.5px}
+.terms th,.terms td{text-align:left;padding:9px 0;border-top:1px solid var(--line);vertical-align:top}
+.terms tr:first-child th,.terms tr:first-child td{border-top:0}
+.terms th{width:34%;color:var(--muted);font-weight:600;padding-right:14px}
+
+details{border-top:1px solid var(--line);padding:10px 0}
+details:first-of-type{border-top:0;padding-top:0}
+summary{cursor:pointer;font-weight:700;list-style:none;display:flex;justify-content:space-between;gap:12px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";color:var(--muted);font-weight:400;font-size:18px;line-height:1.3}
+details[open] summary::after{content:"\2212"}
+details p{margin-top:6px;color:var(--muted)}
+
+.quote{border-left:3px solid var(--gold);padding:2px 0 2px 14px;margin-top:12px}
+.quote b{display:block}
+.quote span{color:var(--muted);font-size:13.5px}
+
+footer{text-align:center;color:var(--muted);font-size:12.5px;padding-top:8px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--card);padding:8px 16px;border-radius:999px;font-size:13.5px;opacity:0;pointer-events:none;transition:.25s}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media (max-width:680px){
+  .hero h1{font-size:24px}
+  .facts{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .fact:nth-child(2){border-right:0}
+  .fact:nth-child(-n+2){border-bottom:1px solid var(--line)}
+  .tracks,.two{grid-template-columns:minmax(0,1fr)}
+  .card{padding:18px 16px}
+  .hero-band{padding:24px 16px 22px}
+  .fill div{grid-template-columns:110px 1fr}
+  .terms th{width:40%}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-in">
+    <a class="logo" href="../" aria-label="Home"><svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#1D5FB4"/><g stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".9"><path d="M32 32L32 13M32 32L50 26M32 32L44 48M32 32L20 48M32 32L14 26"/></g><g stroke="#fff" stroke-width="2" opacity=".35" fill="none"><path d="M32 13L50 26L44 48L20 48L14 26Z"/></g><g fill="#fff"><circle cx="32" cy="13" r="4.2"/><circle cx="50" cy="26" r="4.2"/><circle cx="44" cy="48" r="4.2"/><circle cx="20" cy="48" r="4.2"/><circle cx="14" cy="26" r="4.2"/></g><circle cx="32" cy="32" r="7" fill="#FFE296"/></svg></a>
+    <a class="back" href="../#lab"><span class="zh">← 回到黃芝瑋個人網頁</span><span class="en">← Back to Grace Huang</span></a>
+    <div class="lang" role="group" aria-label="Language">
+      <button type="button" data-set="zh" aria-pressed="false">中</button>
+      <button type="button" data-set="en" aria-pressed="true">EN</button>
+    </div>
+  </div>
+</header>
+
+<main class="page">
+
+  <!-- HERO -->
+  <section class="card hero" id="top">
+    <div class="hero-band">
+      <p class="kicker"><span class="zh">國際實習生招募・TEEP 2027</span><span class="en">International internship · TEEP 2027</span></p>
+      <h1><span class="zh">智癒未來：慢性病數位健康與 AI 創新人才計畫</span><span class="en">Digital Health, AI, and Chronic Disease Research Internship</span></h1>
+      <p class="lede zh">歡迎國際學生到臺北醫學大學，與我們一起用真實世界的醫療資料做研究，開發並驗證能真正走進臨床的數位健康與 AI 工具。</p>
+      <p class="lede en">Come to Taipei Medical University and work with real-world clinical data to build and evaluate digital health and AI tools that are meant to reach patients, not just papers.</p>
+      <div class="cta">
+        <a class="btn" href="#apply"><span class="zh">如何申請</span><span class="en">How to apply</span></a>
+        <a class="btn line" href="#areas"><span class="zh">研究方向</span><span class="en">Research areas</span></a>
+      </div>
+    </div>
+    <div class="facts">
+      <div class="fact"><div class="n">NT$20,000</div><div class="l"><span class="zh">每月獎學金</span><span class="en">Monthly scholarship</span></div></div>
+      <div class="fact"><div class="n"><span class="zh">2 個月起</span><span class="en">2+ months</span></div><div class="l"><span class="zh">最短實習期間</span><span class="en">Minimum stay</span></div></div>
+      <div class="fact"><div class="n">2027</div><div class="l"><span class="zh">1 月至 12 月，彈性起始</span><span class="en">Jan to Dec, flexible start</span></div></div>
+      <div class="fact"><div class="n"><span class="zh">臺北</span><span class="en">Taipei</span></div><div class="l"><span class="zh">臺北醫學大學</span><span class="en">Taipei Medical University</span></div></div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="card" id="about">
+    <h2><span class="zh">關於這個實習</span><span class="en">About the internship</span></h2>
+    <p class="zh">實習由臺北醫學大學醫學資訊研究所黃芝瑋助理教授指導，學員在醫學科技學院健康資訊科技國際研究中心（ICHIT）進行研究。我們的工作橫跨臨床醫學、資料科學與健康科技：不只做模型，也追問這個工具在臨床上是否有效、病人與醫護是否真的會用，以及要如何安全地走向實際應用。</p>
+    <p class="en">The internship is supervised by Dr. Chih-Wei (Grace) Huang, Assistant Professor at the Graduate Institute of Biomedical Informatics, Taipei Medical University (TMU). Interns are based at the International Center for Health Information Technology (ICHIT), College of Medical Science and Technology. Our work sits where clinical medicine, data science, and health technology meet. We do not stop at building models: we ask whether a tool is clinically valid, whether patients and clinicians will actually use it, and what it takes to bring it into care safely.</p>
+    <p class="zh" style="margin-top:10px">每位學員會在第一週和老師確認一個明確的專題，實習結束時帶走一份具體成果。</p>
+    <p class="en" style="margin-top:10px">Every intern agrees on one well-defined project in the first week and leaves with a concrete output.</p>
+  </section>
+
+  <!-- AREAS -->
+  <section class="card" id="areas">
+    <h2><span class="zh">研究方向</span><span class="en">Research areas</span></h2>
+    <p class="sub" style="margin-bottom:14px"><span class="zh">依你的背景與興趣，加入其中一個方向。</span><span class="en">You join one area, matched to your background and interests.</span></p>
+    <div class="tracks">
+      <div class="track">
+        <h3><span class="ico">01</span><span class="zh">真實世界資料的臨床 AI</span><span class="en">Clinical AI from real-world data</span></h3>
+        <p class="zh">使用臺北醫學大學臨床研究資料庫（TMUCRD），串接北醫附醫、萬芳、雙和三院的電子病歷，開發與驗證腎臟病、血液透析、癌症及住院風險預測模型。</p>
+        <p class="en">Build and validate prediction models on the TMU Clinical Research Database (TMUCRD), which links EHRs from three affiliated hospitals. Topics include kidney disease, hemodialysis, oncology, and inpatient risk.</p>
+        <p class="need"><b><span class="zh">適合：</span><span class="en">Good fit:</span></b> <span class="zh">會 Python 或 R</span><span class="en">Python or R</span></p>
+      </div>
+      <div class="track">
+        <h3><span class="ico">02</span><span class="zh">生成式 AI 病人衛教</span><span class="en">Generative AI for patient education</span></h3>
+        <p class="zh">把臨床指引轉成準確、易懂的病人回答：建置知識庫與檢索增強生成（RAG）系統，目前以慢性腎臟病與透析照護為主，並評估大型語言模型輸出的正確性、安全性與可讀性。</p>
+        <p class="en">Turn clinical guidelines into accurate, patient-friendly answers. Build knowledge bases and retrieval-augmented generation (RAG) systems, currently focused on kidney disease and dialysis, and evaluate LLM outputs for accuracy, safety, and readability.</p>
+        <p class="need"><b><span class="zh">適合：</span><span class="en">Good fit:</span></b> <span class="zh">程式或醫療背景皆可</span><span class="en">Programming or clinical background</span></p>
+      </div>
+      <div class="track">
+        <h3><span class="ico">03</span><span class="zh">數位健康介入</span><span class="en">Digital health interventions</span></h3>
+        <p class="zh">為慢性病病人與癌症存活者設計並測試自我管理工具，從需求評估、以使用者為中心的設計，到臨床試驗。</p>
+        <p class="en">Design and test tools that help people with chronic disease and cancer survivors manage their health, from needs assessment and user-centered design to clinical trials.</p>
+        <p class="need"><b><span class="zh">適合：</span><span class="en">Good fit:</span></b> <span class="zh">護理、公衛、醫療、設計</span><span class="en">Nursing, public health, medicine, design</span></p>
+      </div>
+      <div class="track">
+        <h3><span class="ico">04</span><span class="zh">醫材軟體法規與轉譯</span><span class="en">Regulation and translation</span></h3>
+        <p class="zh">了解 AI 工具如何成為醫療器材軟體（SaMD），以及研究成果如何透過醫院與新創走向產品。</p>
+        <p class="en">Learn how an AI tool becomes Software as a Medical Device (SaMD), and how research moves into products through hospitals and startups.</p>
+        <p class="need"><b><span class="zh">適合：</span><span class="en">Good fit:</span></b> <span class="zh">管理、法規、醫療背景</span><span class="en">Business, regulatory, clinical</span></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- LEARN -->
+  <section class="card" id="learn">
+    <h2><span class="zh">你會學到什麼</span><span class="en">What you will gain</span></h2>
+    <div class="two">
+      <div>
+        <h3><span class="zh">研究技能</span><span class="en">Research skills</span></h3>
+        <ul class="zh">
+          <li>在研究倫理（IRB）與資料治理規範下使用去識別化臨床資料</li>
+          <li>完整的機器學習流程：資料清理、特徵工程、模型訓練與驗證</li>
+          <li>臨床 AI 評估：校準、公平性、外部驗證與報告規範</li>
+          <li>為真實醫療情境設計並評估 LLM 或 RAG 應用</li>
+        </ul>
+        <ul class="en">
+          <li>Working with de-identified clinical data under ethics (IRB) and data governance rules</li>
+          <li>An end-to-end machine learning pipeline: cleaning, features, training, validation</li>
+          <li>Evaluating clinical AI beyond accuracy: calibration, fairness, external validation, reporting standards</li>
+          <li>Designing and evaluating an LLM or RAG application for a real healthcare use case</li>
+        </ul>
+      </div>
+      <div>
+        <h3><span class="zh">經驗與連結</span><span class="en">Experience and network</span></h3>
+        <ul class="zh">
+          <li>科學寫作與口頭報告，並有機會參與論文與研討會發表</li>
+          <li>與研究生、臨床醫師與產業夥伴合作</li>
+          <li>參訪醫院與醫療新創，認識臺灣的數位健康生態</li>
+          <li>結業時完成成果報告與口頭發表</li>
+        </ul>
+        <ul class="en">
+          <li>Scientific writing and presentation, with chances to contribute to papers and conference abstracts</li>
+          <li>Working alongside graduate students, clinicians, and industry partners</li>
+          <li>Visits to hospitals and health tech startups in Taiwan</li>
+          <li>A final report and presentation of your work</li>
+        </ul>
+      </div>
+    </div>
+    <div class="quote">
+      <b><span class="zh">已有 2 位實習生留下來讀碩士</span><span class="en">Two former interns stayed on for their master's degree</span></b>
+      <span class="zh">過去的 TEEP 學員來自印度、馬來西亞、緬甸與巴拉圭，其中 2 位在實習後進入北醫醫學資訊研究所碩士班。</span>
+      <span class="en">Past TEEP interns came from India, Malaysia, Myanmar, and Paraguay. Two of them joined the MSc program in Biomedical Informatics at TMU after their internship.</span>
+    </div>
+  </section>
+
+  <!-- ELIGIBILITY + TERMS -->
+  <section class="card" id="terms">
+    <h2><span class="zh">申請資格與條件</span><span class="en">Eligibility and terms</span></h2>
+    <table class="terms">
+      <tr><th><span class="zh">對象</span><span class="en">Who can apply</span></th><td><span class="zh">在學的大學部、碩士或博士生</span><span class="en">Current undergraduate, master's, or PhD students</span></td></tr>
+      <tr><th><span class="zh">科系</span><span class="en">Fields</span></th><td><span class="zh">醫學、資訊、資工、護理、公衛、管理或相關領域</span><span class="en">Medicine, IT, computer science, nursing, public health, management, or related fields</span></td></tr>
+      <tr><th><span class="zh">語言</span><span class="en">Language</span></th><td><span class="zh">英文或中文</span><span class="en">English or Chinese</span></td></tr>
+      <tr><th><span class="zh">加分條件</span><span class="en">Preferred</span></th><td><span class="zh">Python 或 R 程式經驗（AI 與資料方向）</span><span class="en">Python or R experience (for AI and data projects)</span></td></tr>
+      <tr><th><span class="zh">獎學金</span><span class="en">Scholarship</span></th><td><span class="zh">每月新臺幣 20,000 元（教育部 TEEP 補助）</span><span class="en">NT$20,000 per month (Ministry of Education TEEP)</span></td></tr>
+      <tr><th><span class="zh">期間</span><span class="en">Period</span></th><td><span class="zh">2027 年 1 月至 12 月，至少 2 個月，起始日期可彈性安排</span><span class="en">January to December 2027, minimum 2 months, flexible start date</span></td></tr>
+      <tr><th><span class="zh">住宿</span><span class="en">Housing</span></th><td><span class="zh">自行安排，我們會提供租屋資訊</span><span class="en">Self-arranged; we will share housing information</span></td></tr>
+      <tr><th><span class="zh">自付費用</span><span class="en">You cover</span></th><td><span class="zh">簽證費、醫療與旅遊保險、生活費（無申請費）</span><span class="en">Visa fees, health and travel insurance, living costs (no application fee)</span></td></tr>
+    </table>
+  </section>
+
+  <!-- APPLY -->
+  <section class="card" id="apply">
+    <h2><span class="zh">如何申請</span><span class="en">How to apply</span></h2>
+    <ol class="steps">
+      <li>
+        <h3><span class="zh">準備文件</span><span class="en">Prepare your documents</span></h3>
+        <p class="zh">申請表需要上傳以下文件，建議先準備好：</p>
+        <p class="en">The application form asks you to upload these, so have them ready:</p>
+        <ul class="docs">
+          <li><span class="zh">護照資料頁</span><span class="en">Passport ID page</span></li>
+          <li><span class="zh">大頭照</span><span class="en">Headshot photo</span></li>
+          <li><span class="zh">學生證</span><span class="en">Student ID</span></li>
+          <li><span class="zh">英文成績單</span><span class="en">English transcript</span></li>
+          <li><span class="zh">英文能力證明</span><span class="en">English proficiency proof</span></li>
+          <li>CV</li>
+          <li><span class="zh">研究動機說明</span><span class="en">Statement of purpose</span></li>
+        </ul>
+        <p class="sub zh" style="margin-top:8px">研究動機說明請寫出你有興趣的研究方向，以及你具備的技能（例如 Python、臨床背景或資料分析）。</p>
+        <p class="sub en" style="margin-top:8px">In your statement of purpose, name the research area you are interested in and the skills you bring (for example Python, clinical background, or data analysis).</p>
+      </li>
+      <li>
+        <h3><span class="zh">填寫北醫申請表</span><span class="en">Submit the TMU application form</span></h3>
+        <p class="zh">所有申請都必須先完成北醫的官方申請表。填寫時請選擇：</p>
+        <p class="en">All applications start with TMU's official form. When filling it in, please select:</p>
+        <div class="fill">
+          <div><span>Program</span><span>TRI <span class="zh">（研究實習）</span><span class="en">(research internship)</span></span></div>
+          <div><span>Mentor</span><span>Dr. Chih-Wei Huang, Graduate Institute of Biomedical Informatics</span></div>
+          <div><span>Scholarship</span><span>TEEP</span></div>
+          <div><span><span class="zh">TEEP 起訖日</span><span class="en">TEEP dates</span></span><span><span class="zh">你希望的實習期間（至少 2 個月）</span><span class="en">Your preferred period (at least 2 months)</span></span></div>
+        </div>
+        <div class="cta"><a class="btn solid" href="https://form.jotform.com/212271642480450"><span class="zh">前往北醫申請表</span><span class="en">Open the TMU application form</span> ↗</a></div>
+      </li>
+      <li>
+        <h3><span class="zh">寄信通知我們</span><span class="en">Email us after you submit</span></h3>
+        <p class="zh">送出申請表後，請來信告知：(1) 你在表單上填寫的姓名、(2) 希望的實習期間、(3) 有興趣的研究方向。</p>
+        <p class="en">After submitting, email us with (1) your name as entered on the form, (2) your preferred internship period, and (3) the research area you are interested in.</p>
+        <div class="mrow"><span class="val" id="mail">gracehuang@tmu.edu.tw</span><button class="copy" type="button" data-copy="mail"><span class="zh">複製</span><span class="en">Copy</span></button></div>
+        <div class="mrow"><span class="val" id="subj">TEEP Internship Application: [Your Name]</span><button class="copy" type="button" data-copy="subj"><span class="zh">複製主旨</span><span class="en">Copy subject</span></button></div>
+      </li>
+      <li>
+        <h3><span class="zh">審查與線上面談</span><span class="en">Review and online interview</span></h3>
+        <p class="zh">我們會審閱你的資料，並安排簡短的線上面談，確認研究方向與實習期間。錄取後，北醫會協助後續的錄取通知與簽證文件。</p>
+        <p class="en">We review your application and may arrange a short online interview to agree on your project and dates. After acceptance, TMU will help with the admission letter and visa documents.</p>
+      </li>
+    </ol>
+  </section>
+
+  <!-- FAQ -->
+  <section class="card" id="faq">
+    <h2><span class="zh">常見問題</span><span class="en">FAQ</span></h2>
+    <details>
+      <summary><span class="zh">我沒有程式背景，可以申請嗎？</span><span class="en">I don't code. Can I still apply?</span></summary>
+      <p class="zh">可以。數位健康介入與法規轉譯方向不需要程式能力，醫療、護理、公衛與管理背景都很適合。</p>
+      <p class="en">Yes. The digital health intervention and regulation tracks do not require programming. Clinical, nursing, public health, and business backgrounds fit well.</p>
+    </details>
+    <details>
+      <summary><span class="zh">可以線上實習嗎？</span><span class="en">Can I do the internship online?</span></summary>
+      <p class="zh">TEEP 獎學金以來臺實習為原則。若你只能線上參與，請先來信討論。</p>
+      <p class="en">The TEEP scholarship is for onsite internships in Taiwan. If you can only join remotely, email us first to discuss.</p>
+    </details>
+    <details>
+      <summary><span class="zh">已經畢業可以申請嗎？</span><span class="en">I have already graduated. Can I apply?</span></summary>
+      <p class="zh">TEEP 以在學學生為主。已畢業者請來信說明你的情況，我們會協助確認是否符合資格。</p>
+      <p class="en">TEEP is mainly for enrolled students. If you have graduated, email us with your situation and we will check whether you are eligible.</p>
+    </details>
+    <details>
+      <summary><span class="zh">實習結束後可以繼續讀研究所嗎？</span><span class="en">Can I continue to graduate study afterwards?</span></summary>
+      <p class="zh">可以，而且我們很歡迎。已有實習生在結束後申請進入北醫醫學資訊研究所碩士班。</p>
+      <p class="en">Yes, and we encourage it. Former interns have gone on to join the MSc program in Biomedical Informatics at TMU.</p>
+    </details>
+  </section>
+
+  <footer><span class="zh">© 2026 黃芝瑋・臺北醫學大學 醫學資訊研究所</span><span class="en">© 2026 Chih-Wei (Grace) Huang · Graduate Institute of Biomedical Informatics, Taipei Medical University</span></footer>
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+var root=document.documentElement;
+function store(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v);}catch(e){return null;}}
+function setLang(l){root.setAttribute('data-lang',l);root.lang=l==='zh'?'zh-Hant-TW':'en';
+  document.querySelectorAll('.lang button').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.set===l));});}
+document.querySelectorAll('.lang button').forEach(function(b){b.onclick=function(){setLang(b.dataset.set);store('gh-lang-v2',b.dataset.set);};});
+var init=store('gh-lang-v2');if(init!=='zh')init='en';if(location.hash==='#zh')init='zh';if(location.hash==='#en')init='en';setLang(init);
+
+document.querySelectorAll('a[href^="http"]').forEach(function(a){a.target='_blank';a.rel='noopener';});
+
+var tt;function toast(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(function(){t.classList.remove('show');},1700);}
+document.querySelectorAll('.copy').forEach(function(b){b.onclick=function(){
+  var txt=document.getElementById(b.dataset.copy).textContent;
+  var done=function(){toast(root.getAttribute('data-lang')==='zh'?'已複製':'Copied');};
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done,function(){});}
+  else{var ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');done();}catch(e){}document.body.removeChild(ta);}
+};});
+})();
+</script>
+</body>
+</html>
