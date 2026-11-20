@@ -384,7 +384,7 @@ $('adminKey').addEventListener('keydown', e => { if (e.key === 'Enter') $('login
 $('loginBtn').onclick = async () => {
   const k = $('adminKey').value.trim(); if (!k) return;
   const prev = adminKey; adminKey = k;
-  if (!API) { adminKey = prev; $('loginMsg').textContent = '後端尚未啟用，請先完成團主使用說明的「第一次設定」。'; return; }
+  if (!API) { adminKey = prev; $('loginMsg').textContent = '點餐系統尚未啟用，請聯絡系統管理員。'; return; }
   try { const r = await api('adminCheck'); if (r.ok) { ls('drink_admin', k); $('adminKey').value = ''; renderAdmin(); return; } adminKey = prev; $('loginMsg').textContent = '密碼錯誤'; return; } catch {}
   adminKey = prev; $('loginMsg').textContent = '無法連線，請稍後再試';
 };
@@ -503,7 +503,7 @@ $('seDelete').onclick = async () => {
   if (!API) {
     setStatus('尚未開放', 'schedule');
     const n = $('notice'); n.classList.remove('hide');
-    n.innerHTML = '<div>點餐系統尚未啟用，暫時只能瀏覽菜單。<br>團主請依 <a href="setup.html">團主使用說明</a> 完成第一次設定。</div>';
+    n.innerHTML = '<div>點餐系統尚未啟用，暫時只能瀏覽菜單。</div>';
     return;
   }
   await refresh();
