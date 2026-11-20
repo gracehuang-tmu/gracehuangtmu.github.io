@@ -39,10 +39,17 @@
   <section id="vAll" class="hide">
     <div id="adminBox" class="card hide">
       <h2 class="card-title">團主設定</h2>
-      <label class="field-label" for="cfgNote">截止時間或備註</label>
-      <input id="cfgNote" maxlength="80" placeholder="例：11:30 截止，12:30 到貨">
+      <label class="field-label" for="cfgShop">今日訂購商家</label>
+      <input id="cfgShop" maxlength="30" placeholder="例：茶湯會 北醫店" style="margin-bottom:16px">
+      <div class="timegrid">
+        <div><label class="field-label" for="cfgOpenAt">開放訂購時間</label><input id="cfgOpenAt" type="datetime-local"></div>
+        <div><label class="field-label" for="cfgCloseAt">截團時間</label><input id="cfgCloseAt" type="datetime-local"></div>
+      </div>
+      <p class="muted" style="margin:8px 0 16px">留空表示不限制。到截團時間後，同事就無法再新增或修改訂單。</p>
+      <label class="field-label" for="cfgNote">備註</label>
+      <input id="cfgNote" maxlength="80" placeholder="例：12:30 到貨，請到 3 樓會議室領取">
       <div class="row" style="margin-top:16px">
-        <button class="btn ghost" id="cfgSave">儲存備註</button>
+        <button class="btn ghost" id="cfgSave">儲存設定</button>
         <button class="btn ghost" id="cfgToggle">關閉點餐</button>
         <button class="btn danger" id="cfgClear">清空訂單</button>
         <button class="btn ghost" id="adminOut">登出</button>

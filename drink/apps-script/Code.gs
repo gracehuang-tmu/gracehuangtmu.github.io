@@ -41,7 +41,7 @@ function doPost(e) {
   const isAdmin = typeof req.key === 'string' && req.key.length > 0 && req.key === p.getProperty('ADMIN_KEY');
   const action = String(req.action || '');
 
-  if (action === 'state') return out({ ok: true, config: getConfig(ss), orders: listOrders(ss) });
+  if (action === 'state') return out({ ok: true, now: Date.now(), config: getConfig(ss), orders: listOrders(ss) });
   if (action === 'adminCheck') return out({ ok: isAdmin });
 
   const lock = LockService.getScriptLock();
@@ -49,7 +49,7 @@ function doPost(e) {
   try {
     if (action === 'save') {
       const cfg = getConfig(ss);
-      if (!cfg.open && !isAdmin) return out({ ok: false, error: 'closed' });
+      if (!isOpenNow(cfg) && !isAdmin) return out({ ok: false, error: Date.now() < (cfg.openAt || 0) ? 'not_yet' : 'closed' });
       const id = String(req.id || '');
       const token = String(req.token || '');
       if (!/^[a-z0-9]{8,32}$/.test(id) || token.length < 16 || token.length > 64) return out({ ok: false, error: 'bad_id' });
@@ -72,6 +72,10 @@ function doPost(e) {
       const cfg = getConfig(ss);
       if (typeof req.open === 'boolean') cfg.open = req.open;
       if (req.note !== undefined) cfg.note = clip(req.note, 80);
+      if (req.shop !== undefined) cfg.shop = clip(req.shop, 30);
+      if (req.openAt !== undefined) cfg.openAt = toTime(req.openAt);
+      if (req.closeAt !== undefined) cfg.closeAt = toTime(req.closeAt);
+      if (cfg.openAt && cfg.closeAt && cfg.closeAt <= cfg.openAt) return out({ ok: false, error: 'bad_time' });
       ss.getSheetByName('config').getRange('A1').setValue(JSON.stringify(cfg));
       return out({ ok: true });
     }
@@ -96,9 +100,15 @@ function out(o) {
   return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON);
 }
 function getConfig(ss) {
-  try { const c = JSON.parse(ss.getSheetByName('config').getRange('A1').getValue()); return { open: c.open !== false, note: clip(c.note, 80) }; }
-  catch (e) { return { open: true, note: '' }; }
+  try { const c = JSON.parse(ss.getSheetByName('config').getRange('A1').getValue()); return { open: c.open !== false, note: clip(c.note, 80), shop: clip(c.shop, 30), openAt: toTime(c.openAt), closeAt: toTime(c.closeAt) }; }
+  catch (e) { return { open: true, note: '', shop: '', openAt: null, closeAt: null }; }
 }
+// 開放條件：團主未手動關閉，且現在介於開放時間與截團時間之間（未設定的那一端不限制）
+function isOpenNow(cfg) {
+  const now = Date.now();
+  return cfg.open && (!cfg.openAt || now >= cfg.openAt) && (!cfg.closeAt || now < cfg.closeAt);
+}
+function toTime(v) { const n = Math.round(Number(v)); return n > 1.5e12 && n < 4e12 ? n : null; }
 function listOrders(ss) {
   const sh = ss.getSheetByName('orders');
   const n = sh.getLastRow() - 1;

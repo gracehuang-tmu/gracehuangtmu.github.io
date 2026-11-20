@@ -27,7 +27,7 @@ function normMenu(m) {
 }
 
 let MENU = { shop: '', categories: [], ice: DEF_ICE, sugar: DEF_SUGAR, tops: [] };
-let open = true, cfgNote = '', myItems = [], myNick = '', allOrders = [], adminKey = '';
+let open = true, cfgShop = '', cfgNote = '', manualOpen = true, openAt = null, closeAt = null, skew = 0, myItems = [], myNick = '', allOrders = [], adminKey = '';
 let saving = Promise.resolve();
 
 // 每位同事一組隨機 ID 與憑證，存在自己瀏覽器；只有本人能改自己的訂單
@@ -53,8 +53,10 @@ function priceLabel(it) {
 }
 
 // ---------- 菜單 ----------
+const shopName = () => cfgShop || MENU.shop;
+function renderTitle() { const n = shopName(); $('title').textContent = n ? n + '・團購點餐' : '飲料團購點餐'; document.title = $('title').textContent; }
 function renderMenu() {
-  $('title').textContent = MENU.shop ? MENU.shop + ' 團購點餐' : '飲料團購點餐';
+  renderTitle();
   $('catnav').innerHTML = MENU.categories.map((g, i) => `<a href="#" data-c="${i}">${esc(g.c)}</a>`).join('');
   $('menu').innerHTML = MENU.categories.map((g, gi) => `<section class="cat" id="cat${gi}"><h2>${esc(g.c)}</h2>${g.sub ? `<p class="sub">${esc(g.sub)}</p>` : '<div style="height:8px"></div>'}` + g.items.map((it, ii) => {
     const off = !inSeason(it.months);
@@ -94,7 +96,7 @@ function drawSheet() {
   ${MENU.tops.length ? `<div class="grp"><label class="t">加料（可複選）</label>${chips('tops', MENU.tops.map(x => [x[0], `${x[0]} +${x[1]}`]), true)}</div>` : ''}
   <div class="grp"><label class="t">備註</label><input id="sNote" maxlength="40" value="${esc(s.note)}" placeholder="選填"></div>
   <div class="grp"><label class="t">杯數</label><div class="qty"><button data-q="-1" aria-label="減少"><span class="tt-icon">remove</span></button><b>${s.qty}</b><button data-q="1" aria-label="增加"><span class="tt-icon">add</span></button></div></div>
-  ${!open ? '<p class="muted" style="margin-top:16px">團主已截止點餐。</p>' : ''}
+  ${!open ? `<p class="muted" style="margin-top:16px">${phase() === 'notyet' ? '還沒到開放時間：' + esc(fmt(openAt)) : '已截團，無法再點餐。'}</p>` : ''}
   <div class="sheet-foot"><button class="btn ghost" id="sCancel">取消</button><button class="btn" id="sAdd" ${open ? '' : 'disabled'}>加入 $${unitPrice(s) * s.qty}</button></div>`;
 }
 $('sheet').addEventListener('click', e => {
@@ -135,7 +137,7 @@ function renderAll() {
   people.forEach(p => p.items.forEach(x => { const key = x.name + '｜' + spec(x) + (x.note ? '｜' + x.note : ''); m.set(key, (m.get(key) || 0) + (+x.qty || 0)); }));
   const total = people.reduce((a, p) => a + sumOf(p.items), 0), cups = people.reduce((a, p) => a + cupsOf(p.items), 0);
   const lines = [...m.entries()].sort((a, b) => a[0].localeCompare(b[0], 'zh-Hant')).map(([k, q]) => `${k} ×${q}`);
-  $('merged').textContent = lines.length ? (MENU.shop ? MENU.shop + '\n' : '') + lines.join('\n') + `\n\n共 ${cups} 杯，總計 $${total}（${people.length} 人）` : '目前還沒有訂單';
+  $('merged').textContent = lines.length ? (shopName() ? '【' + shopName() + '】\n' : '') + lines.join('\n') + `\n\n共 ${cups} 杯，總計 $${total}（${people.length} 人）` : '目前還沒有訂單';
   $('byPerson').innerHTML = people.length
     ? people.map(p => `<div class="line" style="display:block"><div class="row" style="justify-content:space-between"><b>${esc(p.name)}${p.id === myId ? '（我）' : ''}</b><span class="amt">$${sumOf(p.items)}${adminKey ? ` <button class="x" data-del="${esc(p.id)}">刪除</button>` : ''}</span></div>${p.items.map(x => `<div class="d">・${esc(x.name)} ×${+x.qty}　${esc(spec(x))}${x.note ? '｜' + esc(x.note) : ''}</div>`).join('')}</div>`).join('')
       + `<div class="tot"><span>合計 ${cups} 杯</span><span>$${total}</span></div>`
@@ -160,7 +162,8 @@ function save() {
     try {
       const r = await api('save', { id: myId, token: myToken, name: myNick || $('nick').value.trim(), items });
       if (r.ok) { saveState = items.length ? '已送出，團主可在「全部彙整」看到，之後仍可修改。' : '已取消訂單。'; ls('submitted', items.length ? '1' : '0'); note(''); }
-      else if (r.error === 'closed') { saveState = '團主已截止，這次修改沒有送出。'; }
+      else if (r.error === 'closed') { saveState = '已截團，這次修改沒有送出。'; }
+      else if (r.error === 'not_yet') { saveState = '還沒到開放時間，這次沒有送出。'; }
       else if (r.error === 'forbidden') { saveState = '無法修改這筆訂單，請聯絡團主。'; }
       else saveState = '送出失敗，請稍後再試。';
     } catch { saveState = '連線失敗，請檢查網路後再改一次訂單。'; }
@@ -181,7 +184,10 @@ async function refresh() {
   try {
     const r = await api('state');
     if (r.ok) {
-      open = r.config?.open !== false; cfgNote = str(r.config?.note, 80);
+      manualOpen = r.config?.open !== false; cfgNote = str(r.config?.note, 80); cfgShop = str(r.config?.shop, 30);
+      openAt = +r.config?.openAt || null; closeAt = +r.config?.closeAt || null;
+      if (+r.now) skew = +r.now - Date.now();
+      recompute();
       allOrders = Array.isArray(r.orders) ? r.orders : [];
       const mine = allOrders.find(o => str(o.id, 40) === myId);
       if (!mine && !pending && myItems.length && ls('submitted') === '1') { myItems = []; ls('cart', '[]'); ls('submitted', '0'); saveState = ''; }
@@ -192,10 +198,56 @@ async function refresh() {
   refreshing = false;
 }
 $('refresh').onclick = refresh;
+const nowS = () => Date.now() + skew;
+function fmt(t) {
+  const d = new Date(t), today = new Date(nowS());
+  const hm = d.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false });
+  return d.toDateString() === today.toDateString() ? '今天 ' + hm : `${d.getMonth() + 1}/${d.getDate()} ${hm}`;
+}
+function left(ms) {
+  const m = Math.ceil(ms / 60000);
+  if (m < 60) return `剩 ${m} 分鐘`;
+  const h = Math.floor(m / 60), r = m % 60;
+  return h < 24 ? `剩 ${h} 小時${r ? ' ' + r + ' 分' : ''}` : `剩 ${Math.floor(h / 24)} 天`;
+}
+function phase() {
+  const n = nowS();
+  if (!manualOpen) return 'closed';
+  if (openAt && n < openAt) return 'notyet';
+  if (closeAt && n >= closeAt) return 'closed';
+  return 'open';
+}
+function recompute() {
+  const was = open; open = phase() === 'open';
+  renderCfg();
+  if (was !== open) { renderMine(); if ($('sheetBg').classList.contains('show')) drawSheet(); }
+}
+function renderDeadline() {
+  let el = $('deadline');
+  if (!el) { el = document.createElement('div'); el.id = 'deadline'; el.className = 'deadline'; $('vMenu').prepend(el); }
+  const ph = phase(), n = nowS();
+  let icon, main, sub = '';
+  if (ph === 'notyet') { icon = 'schedule'; main = `${fmt(openAt)} 開放訂購`; sub = closeAt ? `截團：${fmt(closeAt)}` : ''; }
+  else if (ph === 'closed') { icon = 'block'; main = '已截團'; sub = closeAt && n >= closeAt ? `截團時間：${fmt(closeAt)}` : '團主已暫停點餐'; }
+  else if (closeAt) { icon = 'timer'; main = `${fmt(closeAt)} 截團`; sub = left(closeAt - n); }
+  else { el.classList.add('hide'); return; }
+  el.classList.remove('hide');
+  el.innerHTML = `<span class="tt-icon">${icon}</span><div><b>${esc(main)}</b>${sub ? `<span class="muted">${esc(sub)}</span>` : ''}</div>`;
+}
+function toLocalInput(t) { if (!t) return ''; const d = new Date(t); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 16); }
+function fromLocalInput(v) { if (!v) return null; const t = new Date(v).getTime(); return isNaN(t) ? null : t; }
 function renderCfg() {
-  setStatus(open ? '點餐中' : '已截止', open ? 'check_circle' : 'block', open ? 'open' : '');
+  const ph = phase();
+  if (ph === 'open') setStatus('點餐中', 'check_circle', 'open');
+  else if (ph === 'notyet') setStatus('尚未開放', 'schedule');
+  else setStatus('已截團', 'block');
+  renderDeadline();
+  renderTitle();
+  if (document.activeElement !== $('cfgShop')) $('cfgShop').value = cfgShop;
+  if (document.activeElement !== $('cfgOpenAt')) $('cfgOpenAt').value = toLocalInput(openAt);
+  if (document.activeElement !== $('cfgCloseAt')) $('cfgCloseAt').value = toLocalInput(closeAt);
   showNoteLine();
-  $('cfgToggle').textContent = open ? '關閉點餐' : '重新開放點餐';
+  $('cfgToggle').textContent = manualOpen ? '暫停點餐' : '恢復點餐';
   if (document.activeElement !== $('cfgNote')) $('cfgNote').value = cfgNote;
 }
 
@@ -210,11 +262,15 @@ $('loginBtn').onclick = async () => {
 };
 $('adminOut').onclick = () => { adminKey = ''; ls('drink_admin', null); renderAdmin(); };
 async function adminDo(action, payload, msg) {
-  try { const r = await api(action, payload); $('adminMsg').textContent = r.ok ? msg : '操作失敗（' + (r.error || '') + '）'; } catch { $('adminMsg').textContent = '連線失敗'; }
+  try { const r = await api(action, payload); $('adminMsg').textContent = r.ok ? msg : (r.error === 'bad_time' ? '截團時間要晚於開放時間' : '操作失敗（' + (r.error || '') + '）'); } catch { $('adminMsg').textContent = '連線失敗'; }
   setTimeout(() => $('adminMsg').textContent = '', 3000); refresh();
 }
-$('cfgSave').onclick = () => adminDo('config', { note: $('cfgNote').value.trim() }, '已儲存');
-$('cfgToggle').onclick = () => adminDo('config', { open: !open }, open ? '已關閉點餐' : '已開放點餐');
+$('cfgSave').onclick = () => {
+  const oa = fromLocalInput($('cfgOpenAt').value), ca = fromLocalInput($('cfgCloseAt').value);
+  if (oa && ca && ca <= oa) { $('adminMsg').textContent = '截團時間要晚於開放時間'; return; }
+  adminDo('config', { shop: $('cfgShop').value.trim(), note: $('cfgNote').value.trim(), openAt: oa, closeAt: ca }, '已儲存');
+};
+$('cfgToggle').onclick = () => adminDo('config', { open: !manualOpen }, manualOpen ? '已暫停點餐' : '已恢復點餐');
 $('cfgClear').onclick = () => $('clearConfirm').classList.remove('hide');
 $('clearNo').onclick = () => $('clearConfirm').classList.add('hide');
 $('clearYes').onclick = () => { $('clearConfirm').classList.add('hide'); adminDo('clear', {}, '已清空'); };
@@ -229,4 +285,5 @@ $('byPerson').addEventListener('click', e => { const b = e.target.closest('[data
   if (!API) { setStatus('尚未開放', 'schedule'); note('團主尚未完成設定，暫時無法送出訂單。'); return; }
   await refresh();
   setInterval(() => { if (!document.hidden) refresh(); }, 20000);
+  setInterval(recompute, 15000);
 })();

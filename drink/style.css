@@ -127,3 +127,10 @@ pre { white-space: pre-wrap; background: var(--canvas); padding: var(--s16); bor
 .notice::before { content: "info"; font-family: "Material Symbols Outlined"; font-size: 20px; line-height: 1; color: var(--blue-deep); font-feature-settings: "liga"; }
 .empty { text-align: center; padding: var(--s16) 0; }
 .foot { text-align: center; padding: var(--s16) 0; }
+
+.timegrid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s16); }
+@media (max-width: 520px) { .timegrid { grid-template-columns: 1fr; } }
+.deadline { background: var(--surface-card); border-radius: var(--r-3xl); padding: var(--s16) var(--s24); margin-bottom: var(--s24); display: flex; align-items: center; gap: 12px; }
+.deadline .tt-icon { flex: none; }
+.deadline b { font-weight: 500; }
+.deadline .muted { display: block; }
