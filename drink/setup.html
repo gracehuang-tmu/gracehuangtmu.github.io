@@ -25,8 +25,9 @@ code { font-family: ui-monospace, Menlo, monospace; font-size: 13px; background:
 </header>
 <main>
   <div class="card">
-    <p class="phase">第一次設定（只做一次，需用電腦，約 5 分鐘）</p>
-    <h2 class="card-title">啟用後端</h2>
+    <p class="phase">系統管理員・只做一次（需用電腦，約 5 分鐘）</p>
+    <h2 class="card-title">啟用系統</h2>
+    <p class="muted" style="margin:0 0 16px">團主不需要做這段。完成後把團主密碼交給要開團的同事即可。</p>
     <ol class="steps">
       <li><b>建立 Apps Script 專案</b>：打開 <a class="link" href="https://script.google.com" target="_blank" rel="noopener">script.google.com</a> → 新專案，刪掉原本的 <code>function myFunction() {}</code>。</li>
       <li><b>貼上程式並儲存</b>：打開 <a class="link" href="https://raw.githubusercontent.com/gracehuang-tmu/gracehuangtmu.github.io/main/drink/apps-script/Code.gs" target="_blank" rel="noopener">Code.gs 純文字版</a>，全選複製、貼上，按 Ctrl+S（Mac：⌘+S）。</li>
@@ -35,16 +36,20 @@ code { font-family: ui-monospace, Menlo, monospace; font-size: 13px; background:
       <li><b>部署</b>：右上「部署」→「新增部署作業」→ 齒輪選「網頁應用程式」；執行身分「我」、存取權「所有人」→ 部署 → 授權存取。</li>
       <li><b>把網址交給 Claude</b>：複製 <code>https://script.google.com/macros/s/…/exec</code>，貼給 Claude；Claude 會填入 <code>config.js</code> 並送一筆測試訂單確認。
         <ul class="sub"><li>完成後點餐頁上方會顯示「點餐中」，不再出現「尚未開放」提示。</li></ul></li>
-      <li><b>團主登入</b>：點餐頁右上角 <span class="tt-icon" style="font-size:18px">admin_panel_settings</span> 圖示（或「全部彙整」頁底的「團主登入」）→ 輸入團主密碼。同一台裝置會記住登入。</li>
+      <li><b>把團主密碼交給團主</b>：所有團主共用這組密碼。要換密碼，到 Apps Script「專案設定」→「指令碼屬性」修改 ADMIN_KEY。</li>
     </ol>
   </div>
 
   <div class="card">
-    <p class="phase">每次揪團</p>
+    <p class="phase">團主・每次開團（手機就能操作）</p>
     <h2 class="card-title">開團到叫貨</h2>
     <ol class="steps">
-      <li><b>換菜單（換店時才需要）</b>：把新菜單照片傳給 Claude，Claude 辨識後更新頁面菜單。</li>
-      <li><b>設定這次的團</b>：「全部彙整」→「團主設定」，填今日訂購商家、開放訂購時間、截團時間、備註（到貨時間、領取地點）→ 儲存設定。</li>
+      <li><b>團主登入</b>：點餐頁右上角 <span class="tt-icon" style="font-size:18px">admin_panel_settings</span> 圖示 → 輸入團主密碼。同一台裝置會記住登入。</li>
+      <li><b>選商家</b>：「團主設定」→「今日訂購商家」選單直接選，馬上生效。
+        <ul class="sub"><li>新的店：按「新增商家（上傳菜單）」，填店名、上傳菜單照片 → 儲存。同事會看到照片，自行填寫品項與價格。</li>
+        <li>想讓同事直接點選品項（選填）：在同一畫面展開「進階：建立點選式菜單」，按「複製 AI 指令」，連同菜單照片貼給 ChatGPT、Gemini 或 Claude，再把回覆貼回來 → 儲存。</li>
+        <li>存過的商家下次直接從選單選，不用重傳。</li></ul></li>
+      <li><b>設定時間</b>：填開放訂購時間、截團時間、備註（到貨時間、領取地點）→ 儲存設定。</li>
       <li><b>清掉上一團的訂單</b>：同一區按「清空訂單」。</li>
       <li><b>分享連結</b>：把 <code>https://gracehuang-lab.com/drink/</code> 貼到 LINE 群組。同事不需登入，輸入名字點飲料就會自動送出，截團前可自行修改。</li>
       <li><b>截團</b>：到截團時間自動關閉；需要提早結束可按「暫停點餐」。</li>
@@ -56,7 +61,8 @@ code { font-family: ui-monospace, Menlo, monospace; font-size: 13px; background:
     <h2 class="card-title">常見問題</h2>
     <ol class="steps">
       <li><b>同事送不出去</b>：檢查是否已過截團時間或被暫停；否則請對方重新整理頁面。</li>
-      <li><b>忘記團主密碼</b>：回 Apps Script 再執行一次 <code>setup</code>，執行紀錄會再顯示同一組密碼。</li>
+      <li><b>忘記團主密碼</b>：請系統管理員回 Apps Script 再執行一次 <code>setup</code>，執行紀錄會顯示同一組密碼。</li>
+      <li><b>菜單照片看不清楚</b>：點照片會全螢幕顯示，可用手指放大。拍照時盡量正面、光線充足，一張拍不完可分多張上傳。</li>
       <li><b>更新了 Code.gs</b>：存檔後要「部署」→「管理部署作業」→ 編輯 → 版本選「新版本」→ 部署，網址不變。</li>
     </ol>
   </div>

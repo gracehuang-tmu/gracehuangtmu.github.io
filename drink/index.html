@@ -27,9 +27,20 @@
 
   <section id="vMenu">
     <div class="card who" style="padding:16px 24px"><span class="tt-icon">person</span><input id="nick" placeholder="你的名字（取飲料時叫你）" maxlength="20" aria-label="你的名字"></div>
+    <div id="gallery" class="card hide">
+      <h2 class="card-title">菜單照片</h2>
+      <div class="thumbs" id="thumbs"></div>
+      <p class="muted" style="margin:8px 0 0">點照片可放大</p>
+    </div>
+    <div id="freeBox" class="card hide">
+      <h2 class="card-title">填寫飲料</h2>
+      <p class="muted" style="margin:0 0 16px" id="freeHint">這家店請看上方菜單照片，自行填寫品項與價格。</p>
+      <button class="btn ghost" id="freeBtn"><span class="tt-icon">edit</span>填寫一杯</button>
+    </div>
     <nav class="catnav" id="catnav" aria-label="分類"></nav>
     <div id="menu"></div>
     <p class="muted" id="menuFoot"></p>
+    <p class="foot hide" id="otherLink"><a href="#" class="link" id="otherBtn">菜單上找不到？自行填寫品項</a></p>
   </section>
 
   <section id="vMine" class="hide">
@@ -40,7 +51,8 @@
     <div id="adminBox" class="card hide">
       <h2 class="card-title">團主設定</h2>
       <label class="field-label" for="cfgShop">今日訂購商家</label>
-      <input id="cfgShop" maxlength="30" placeholder="例：茶湯會 北醫店" style="margin-bottom:16px">
+      <div class="row" style="flex-wrap:nowrap;margin-bottom:8px"><select id="cfgShop" style="flex:1"></select><button class="btn ghost" id="shopEdit">編輯</button></div>
+      <p style="margin:0 0 16px"><a href="#" class="link" id="shopNew">＋ 新增商家（上傳菜單）</a></p>
       <div class="timegrid">
         <div><label class="field-label" for="cfgOpenAt">開放訂購時間</label><input id="cfgOpenAt" type="datetime-local"></div>
         <div><label class="field-label" for="cfgCloseAt">截團時間</label><input id="cfgCloseAt" type="datetime-local"></div>
@@ -57,6 +69,32 @@
       <div id="clearConfirm" class="row hide" style="margin-top:16px"><span class="muted">確定刪除所有人的訂單？</span><button class="btn danger" id="clearYes">確定清空</button><button class="btn ghost" id="clearNo">取消</button></div>
       <div id="adminMsg" class="muted" style="margin-top:8px"></div>
       <p class="muted" style="margin:8px 0 0"><a class="link" href="setup.html">團主使用說明</a></p>
+    </div>
+
+    <div id="shopEditor" class="card hide">
+      <h2 class="card-title" id="seTitle">新增商家</h2>
+      <label class="field-label" for="seName">商家名稱</label>
+      <input id="seName" maxlength="30" placeholder="例：茶湯會 北醫店">
+      <div class="grp"><label class="t">菜單照片（最多 6 張）</label>
+        <div class="thumbs" id="seThumbs"></div>
+        <label class="btn ghost" style="margin-top:8px"><span class="tt-icon">add_photo_alternate</span>選擇照片<input type="file" id="seFile" accept="image/*" multiple hidden></label>
+      </div>
+      <details class="grp" id="seAdv">
+        <summary class="field-label" style="cursor:pointer">進階：建立點選式菜單（選填）</summary>
+        <p class="muted" style="margin:8px 0">有了點選式菜單，同事只要點品項、選冰塊甜度，不用自己打字和填價格。沒有也能點餐。</p>
+        <div class="row" style="margin-bottom:8px"><button class="btn ghost" id="seCopyPrompt"><span class="tt-icon">content_copy</span>複製 AI 指令</button><span class="muted" id="sePromptMsg"></span></div>
+        <p class="muted" style="margin:0 0 8px">做法：把菜單照片和這段指令一起貼給 ChatGPT、Gemini 或 Claude，再把它回覆的文字貼到下面。</p>
+        <textarea id="seText" rows="12" style="font-family:ui-monospace,Menlo,monospace;font-size:13px" placeholder="# 分類名稱
+品名 M50 L55
+品名 45
+冰塊: 正常冰 少冰 微冰 去冰 溫 熱
+甜度: 正常糖 少糖 半糖 微糖 無糖
+加料: 珍珠5 椰果10"></textarea>
+        <div id="sePreview" class="muted" style="margin-top:8px"></div>
+      </details>
+      <label class="row" style="margin-top:16px"><input type="checkbox" id="seUse" checked style="width:auto"> 儲存後設為今日訂購商家</label>
+      <div class="row" style="margin-top:16px"><button class="btn" id="seSave">儲存</button><button class="btn ghost" id="seCancel">取消</button><button class="btn danger hide" id="seDelete">刪除這家</button></div>
+      <div id="seMsg" class="muted" style="margin-top:8px"></div>
     </div>
 
     <div class="card">
@@ -80,6 +118,7 @@
 
 <div class="cartbar" id="cartbar"><div class="cartbar-inner"><div><b id="cbCount">0 杯</b> <span class="muted" id="cbSum">$0</span></div><button class="btn" id="cbGo">查看訂單</button></div></div>
 
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true"><img id="lbImg" alt="菜單照片"><button class="iconbtn close" id="lbClose" aria-label="關閉"><span class="tt-icon">close</span></button><button class="iconbtn nav prev" id="lbPrev" aria-label="上一張"><span class="tt-icon">chevron_left</span></button><button class="iconbtn nav next" id="lbNext" aria-label="下一張"><span class="tt-icon">chevron_right</span></button></div>
 <div class="sheet-bg" id="sheetBg"><div class="sheet" id="sheet" role="dialog" aria-modal="true"></div></div>
 
 <script src="config.js"></script>

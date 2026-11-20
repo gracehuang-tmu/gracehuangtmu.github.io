@@ -22,9 +22,12 @@ function setup() {
     ss.insertSheet('config').getRange('A1').setValue(JSON.stringify({ open: true, note: '' }));
     p.setProperty('SHEET_ID', ss.getId());
   }
+  const ss2 = SpreadsheetApp.openById(p.getProperty('SHEET_ID'));
+  if (!ss2.getSheetByName('menus')) { const m = ss2.insertSheet('menus'); m.appendRow(['商家', 'menu_json', '更新時間', 'image_ids']); m.setFrozenRows(1); }
   if (!p.getProperty('ADMIN_KEY')) {
     p.setProperty('ADMIN_KEY', Utilities.getUuid().replace(/-/g, '').slice(0, 10));
   }
+  imageFolder();
   Logger.log('試算表網址：' + SpreadsheetApp.openById(p.getProperty('SHEET_ID')).getUrl());
   Logger.log('團主密碼：' + p.getProperty('ADMIN_KEY'));
 }
@@ -41,7 +44,19 @@ function doPost(e) {
   const isAdmin = typeof req.key === 'string' && req.key.length > 0 && req.key === p.getProperty('ADMIN_KEY');
   const action = String(req.action || '');
 
-  if (action === 'state') return out({ ok: true, now: Date.now(), config: getConfig(ss), orders: listOrders(ss) });
+  if (action === 'state') {
+    const cfg = getConfig(ss);
+    const info = cfg.shop ? getShop(ss, cfg.shop) : null;
+    return out({ ok: true, now: Date.now(), config: cfg, orders: listOrders(ss), shops: listShops(ss), menu: info ? info.menu : null, images: info ? info.images : [] });
+  }
+  if (action === 'getShop') return out({ ok: true, shop: getShop(ss, clip(req.shop, 30)) });
+  if (action === 'image') {
+    // 只回傳登記在菜單表裡的圖片，避免讀到雲端硬碟其他檔案
+    const id = String(req.id || '');
+    if (!/^[\w-]{10,100}$/.test(id) || allImageIds(ss).indexOf(id) < 0) return out({ ok: false, error: 'not_found' });
+    const blob = DriveApp.getFileById(id).getBlob();
+    return out({ ok: true, data: 'data:' + blob.getContentType() + ';base64,' + Utilities.base64Encode(blob.getBytes()) });
+  }
   if (action === 'adminCheck') return out({ ok: isAdmin });
 
   const lock = LockService.getScriptLock();
@@ -77,6 +92,35 @@ function doPost(e) {
       if (req.closeAt !== undefined) cfg.closeAt = toTime(req.closeAt);
       if (cfg.openAt && cfg.closeAt && cfg.closeAt <= cfg.openAt) return out({ ok: false, error: 'bad_time' });
       ss.getSheetByName('config').getRange('A1').setValue(JSON.stringify(cfg));
+      return out({ ok: true });
+    }
+    if (action === 'saveMenu') {
+      const shop = clip(req.shop, 30);
+      const menu = req.menu && Array.isArray(req.menu.categories) ? req.menu : { categories: [] };
+      const json = JSON.stringify(menu);
+      if (!shop || json.length > 45000) return out({ ok: false, error: 'bad_menu' });
+      const sh = menuSheet(ss);
+      const row = findRow(sh, shop);
+      const old = row ? parseIds(sh.getRange(row, 4).getValue()) : [];
+      const keep = Array.isArray(req.keepImages) ? req.keepImages.map(String).filter(id => old.indexOf(id) >= 0) : [];
+      const uploads = Array.isArray(req.newImages) ? req.newImages.slice(0, 6 - keep.length) : [];
+      const added = [];
+      for (const d of uploads) {
+        const m = /^data:(image\/(?:jpeg|png|webp));base64,([A-Za-z0-9+\/=]+)$/.exec(String(d));
+        if (!m || m[2].length > 3500000) return out({ ok: false, error: 'bad_image' });
+        const f = imageFolder().createFile(Utilities.newBlob(Utilities.base64Decode(m[2]), m[1], shop + '-' + Date.now() + '.jpg'));
+        added.push(f.getId());
+      }
+      old.filter(id => keep.indexOf(id) < 0).forEach(trashFile);
+      const ids = keep.concat(added);
+      const vals = [safe(shop), json, new Date(), JSON.stringify(ids)];
+      if (row) sh.getRange(row, 1, 1, 4).setValues([vals]); else sh.appendRow(vals);
+      return out({ ok: true, images: ids });
+    }
+    if (action === 'deleteMenu') {
+      const sh = menuSheet(ss);
+      const row = findRow(sh, clip(req.shop, 30));
+      if (row) { parseIds(sh.getRange(row, 4).getValue()).forEach(trashFile); sh.deleteRow(row); }
       return out({ ok: true });
     }
     if (action === 'delete') {
@@ -119,11 +163,44 @@ function listOrders(ss) {
     return { id: String(r[0]), name: String(r[1]).replace(/^'/, ''), items: items, updatedAt: r[5] };
   });
 }
+function menuSheet(ss) {
+  let m = ss.getSheetByName('menus');
+  if (!m) { m = ss.insertSheet('menus'); m.appendRow(['商家', 'menu_json', '更新時間', 'image_ids']); m.setFrozenRows(1); }
+  return m;
+}
+function listShops(ss) {
+  const sh = menuSheet(ss), n = sh.getLastRow() - 1;
+  if (n < 1) return [];
+  return sh.getRange(2, 1, n, 1).getValues().map(r => String(r[0]).replace(/^'/, '')).filter(String);
+}
+function getShop(ss, shop) {
+  if (!shop) return null;
+  const sh = menuSheet(ss), row = findRow(sh, shop);
+  if (!row) return null;
+  const v = sh.getRange(row, 1, 1, 4).getValues()[0];
+  let menu = null; try { menu = JSON.parse(v[1]); } catch (e) {}
+  return { name: shop, menu: menu, images: parseIds(v[3]) };
+}
+function parseIds(v) { try { const a = JSON.parse(v); return Array.isArray(a) ? a.map(String) : []; } catch (e) { return []; } }
+function allImageIds(ss) {
+  const sh = menuSheet(ss), n = sh.getLastRow() - 1;
+  if (n < 1) return [];
+  return [].concat.apply([], sh.getRange(2, 4, n, 1).getValues().map(r => parseIds(r[0])));
+}
+function imageFolder() {
+  const p = PropertiesService.getScriptProperties();
+  const id = p.getProperty('FOLDER_ID');
+  if (id) { try { return DriveApp.getFolderById(id); } catch (e) {} }
+  const f = DriveApp.createFolder('飲料團購菜單照片');
+  p.setProperty('FOLDER_ID', f.getId());
+  return f;
+}
+function trashFile(id) { try { DriveApp.getFileById(id).setTrashed(true); } catch (e) {} }
 function findRow(sh, id) {
   const n = sh.getLastRow() - 1;
   if (n < 1 || !id) return 0;
   const ids = sh.getRange(2, 1, n, 1).getValues();
-  for (let i = 0; i < ids.length; i++) if (String(ids[i][0]) === id) return i + 2;
+  for (let i = 0; i < ids.length; i++) if (String(ids[i][0]).replace(/^'/, '') === id.replace(/^'/, '')) return i + 2;
   return 0;
 }
 function clip(v, n) { return (typeof v === 'string' || typeof v === 'number') ? String(v).trim().slice(0, n) : ''; }
