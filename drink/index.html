@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
 <title>飲料團購點餐</title>
-<link rel="stylesheet" href="style.css?v=202611201411">
+<link rel="stylesheet" href="style.css?v=202611201420">
 </head>
 <body>
 <header class="tt-nav">
@@ -50,6 +50,7 @@
   <section id="vAll" class="hide">
     <div id="adminBox" class="card hide">
       <h2 class="card-title">團主設定</h2>
+      <p class="muted" style="margin:-8px 0 16px">此頁不會自動更新。要看最新訂單請按叫貨清單旁的「更新」。</p>
       <label class="field-label" for="cfgShop">今日訂購商家</label>
       <div class="row" style="flex-wrap:nowrap;margin-bottom:8px"><select id="cfgShop" style="flex:1"></select><button class="btn ghost" id="shopEdit">編輯</button></div>
       <p style="margin:0 0 16px"><a href="#" class="link" id="shopNew">＋ 新增商家（上傳菜單）</a></p>
@@ -80,11 +81,10 @@
         <div class="thumbs" id="seThumbs"></div>
         <label class="btn ghost" style="margin-top:8px"><span class="tt-icon">add_photo_alternate</span>選擇照片<input type="file" id="seFile" accept="image/*" multiple hidden></label>
       </div>
-      <details class="grp" id="seAdv">
-        <summary class="field-label" style="cursor:pointer">進階：建立點選式菜單（選填）</summary>
-        <p class="muted" style="margin:8px 0">有了點選式菜單，同事只要點品項、選冰塊甜度，不用自己打字和填價格。沒有也能點餐。</p>
-        <div class="row" style="margin-bottom:8px"><button class="btn ghost" id="seCopyPrompt"><span class="tt-icon">content_copy</span>複製 AI 指令</button><span class="muted" id="sePromptMsg"></span></div>
-        <p class="muted" style="margin:0 0 8px">做法：把菜單照片和這段指令一起貼給 ChatGPT、Gemini 或 Claude，再把它回覆的文字貼到下面。</p>
+      <div class="grp" id="seAdv">
+        <label class="t" for="seText">點選式菜單</label>
+        <p class="muted" style="margin:0 0 8px">上傳照片後會自動解析成品項，請核對價格，可直接修改文字。標示 [待確認] 的是 AI 看不清楚的地方。</p>
+        <div class="row" style="margin-bottom:8px"><button class="btn ghost" id="seParse"><span class="tt-icon">auto_awesome</span>用 AI 解析照片</button><button class="btn ghost hide" id="seStop">停止</button><span class="muted" id="seAiMsg"></span></div>
         <textarea id="seText" rows="12" style="font-family:ui-monospace,Menlo,monospace;font-size:13px" placeholder="# 分類名稱
 品名 M50 L55
 品名 45
@@ -92,7 +92,11 @@
 甜度: 正常糖 少糖 半糖 微糖 無糖
 加料: 珍珠5 椰果10"></textarea>
         <div id="sePreview" class="muted" style="margin-top:8px"></div>
-      </details>
+        <details style="margin-top:12px"><summary class="muted" style="cursor:pointer">AI 解析不能用時：改用其他 AI 工具</summary>
+          <p class="muted" style="margin:8px 0">按下方按鈕複製指令，連同菜單照片貼給 ChatGPT、Gemini 或 Claude，再把回覆貼到上面的文字框。</p>
+          <div class="row"><button class="btn ghost" id="seCopyPrompt"><span class="tt-icon">content_copy</span>複製 AI 指令</button><span class="muted" id="sePromptMsg"></span></div>
+        </details>
+      </div>
       <label class="row" style="margin-top:16px"><input type="checkbox" id="seUse" checked style="width:auto"> 儲存後設為今日訂購商家</label>
       <div class="row" style="margin-top:16px"><button class="btn" id="seSave">儲存</button><button class="btn ghost" id="seCancel">取消</button><button class="btn danger hide" id="seDelete">刪除這家</button></div>
       <div id="seMsg" class="muted" style="margin-top:8px"></div>
@@ -121,7 +125,7 @@
 <div class="lightbox" id="lightbox" role="dialog" aria-modal="true"><img id="lbImg" alt="菜單照片"><button class="iconbtn close" id="lbClose" aria-label="關閉"><span class="tt-icon">close</span></button><button class="iconbtn nav prev" id="lbPrev" aria-label="上一張"><span class="tt-icon">chevron_left</span></button><button class="iconbtn nav next" id="lbNext" aria-label="下一張"><span class="tt-icon">chevron_right</span></button></div>
 <div class="sheet-bg" id="sheetBg"><div class="sheet" id="sheet" role="dialog" aria-modal="true"></div></div>
 
-<script src="config.js?v=202611201411"></script>
-<script src="app.js?v=202611201411"></script>
+<script src="config.js?v=202611201420"></script>
+<script src="app.js?v=202611201420"></script>
 </body>
 </html>

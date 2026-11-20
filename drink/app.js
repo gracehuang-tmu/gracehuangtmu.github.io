@@ -269,7 +269,10 @@ function renderAll() {
 $('copyBtn').addEventListener('click', async () => { try { await navigator.clipboard.writeText($('merged').textContent); $('copyMsg').textContent = '已複製'; } catch { $('copyMsg').textContent = '無法自動複製，請長按上方文字選取'; } setTimeout(() => $('copyMsg').textContent = '', 2500); });
 
 // ---------- 分頁 ----------
-function show(v) { ['Menu', 'Mine', 'All'].forEach(n => { $('v' + n).classList.toggle('hide', n !== v); $('tab' + n).setAttribute('aria-selected', String(n === v)); }); $('cartbar').classList.toggle('hide', v !== 'Menu'); window.scrollTo(0, 0); if (v === 'All') refresh(); }
+let curView = 'Menu';
+// 團主登入後在團主專區時，完全不自動更新；只在按「更新」或操作後才重新讀取
+const adminView = () => curView === 'All' && !!adminKey;
+function show(v) { curView = v; ['Menu', 'Mine', 'All'].forEach(n => { $('v' + n).classList.toggle('hide', n !== v); $('tab' + n).setAttribute('aria-selected', String(n === v)); }); $('cartbar').classList.toggle('hide', v !== 'Menu'); window.scrollTo(0, 0); if (v === 'All') refresh(); }
 $('tabMenu').onclick = () => show('Menu'); $('tabMine').onclick = () => show('Mine'); $('tabAll').onclick = () => show('All'); $('cbGo').onclick = () => show('Mine');
 
 // ---------- 儲存 ----------
@@ -454,21 +457,21 @@ async function openEditor(name) {
   $('seTitle').textContent = name ? '編輯商家' : '新增商家';
   $('seName').value = name || ''; $('seName').readOnly = !!name;
   $('seText').value = ''; $('seMsg').textContent = ''; $('seDelete').classList.toggle('hide', !name); $('seDelete').textContent = '刪除這家';
-  $('seUse').checked = true; $('seAdv').open = false;
+  $('seUse').checked = true; $('seAiMsg').textContent = '';
   $('shopEditor').classList.remove('hide'); $('shopEditor').scrollIntoView({ block: 'start' });
   edThumbs(); edPreview();
   if (name) {
     $('seMsg').textContent = '載入中…';
     try {
       const r = await api('getShop', { shop: name });
-      if (r.ok && r.shop) { ed.keep = strs(r.shop.images, 100, 6); $('seText').value = menuToText(normMenu(r.shop.menu)); if ($('seText').value) $('seAdv').open = true; edThumbs(); edPreview(); }
+      if (r.ok && r.shop) { ed.keep = strs(r.shop.images, 100, 6); $('seText').value = menuToText(normMenu(r.shop.menu)); edThumbs(); edPreview(); }
       $('seMsg').textContent = '';
     } catch { $('seMsg').textContent = '載入失敗，請重試'; }
   }
 }
 $('shopNew').onclick = e => { e.preventDefault(); openEditor(''); };
 $('shopEdit').onclick = () => { if (cfgShop) openEditor(cfgShop); };
-$('seCancel').onclick = () => { ed = null; $('shopEditor').classList.add('hide'); };
+$('seCancel').onclick = () => { aiCtl = null; $('seParse').disabled = false; $('seStop').classList.add('hide'); ed = null; $('shopEditor').classList.add('hide'); };
 $('seText').addEventListener('input', edPreview);
 $('seThumbs').addEventListener('click', e => {
   const rm = e.target.closest('[data-rm]');
@@ -490,14 +493,41 @@ $('seFile').onchange = async () => {
     try { ed.add.push(await compress(f)); } catch { $('seMsg').textContent = '有照片無法讀取，請換成 JPG 或 PNG'; }
   }
   edThumbs();
+  // 上傳照片後立刻自動解析；已有內容時不覆蓋，改提示可按按鈕重新解析
+  if (files.length && !$('seText').value.trim()) parseWithAI();
+  else if (files.length) $('seAiMsg').textContent = '已加入照片。要重新解析請按「用 AI 解析照片」（會取代目前內容）';
 };
+let aiCtl = null;
+async function parseWithAI() {
+  if (!ed || (!ed.keep.length && !ed.add.length)) { $('seAiMsg').textContent = '請先上傳菜單照片'; return; }
+  const my = aiCtl = {};
+  $('seParse').disabled = true; $('seStop').classList.remove('hide');
+  $('seAiMsg').textContent = 'AI 解析中，約需 10 到 40 秒…';
+  try {
+    const r = await api('parseMenu', { keepImages: ed.keep, newImages: ed.add });
+    if (aiCtl !== my || !ed) return;
+    if (r.ok) {
+      $('seText').value = r.text; const p = edPreview();
+      const n = p ? p.menu.categories.reduce((a, g) => a + g.items.length, 0) : 0;
+      const unsure = (r.text.match(/待確認/g) || []).length;
+      $('seAiMsg').textContent = n ? `解析完成：${n} 個品項${unsure ? `，${unsure} 項待確認` : ''}。請核對後儲存。` : '沒有解析到品項，請換一張更清楚的照片，或手動填寫。';
+    } else {
+      const msg = { no_ai_key: '尚未設定 AI 金鑰，請聯絡系統管理員；也可以先手動填寫或改用下方其他 AI 工具。', ai_busy: 'AI 使用量暫時達上限，請過一分鐘再試。', ai_empty: 'AI 沒有回應內容，請再試一次。', no_image: '請先上傳菜單照片', not_admin: '團主登入已失效，請重新登入' };
+      $('seAiMsg').textContent = msg[r.error] || 'AI 解析失敗，請再試一次。';
+    }
+  } catch { if (aiCtl === my) $('seAiMsg').textContent = '連線失敗，請再試一次。'; }
+  if (aiCtl === my) { aiCtl = null; $('seParse').disabled = false; $('seStop').classList.add('hide'); }
+}
+$('seParse').onclick = parseWithAI;
+$('seStop').onclick = () => { aiCtl = null; $('seParse').disabled = false; $('seStop').classList.add('hide'); $('seAiMsg').textContent = '已停止'; };
 $('seCopyPrompt').onclick = async () => { try { await navigator.clipboard.writeText(AI_PROMPT); $('sePromptMsg').textContent = '已複製'; } catch { $('sePromptMsg').textContent = '無法複製'; } setTimeout(() => $('sePromptMsg').textContent = '', 2500); };
 $('seSave').onclick = async () => {
   const shop = $('seName').value.trim().slice(0, 30);
   if (!shop) { $('seName').focus(); $('seMsg').textContent = '請填商家名稱'; return; }
   if (!ed.orig && shops.includes(shop)) { $('seMsg').textContent = '已有同名商家，請從選單選它再按「編輯」'; return; }
   const r = edPreview();
-  if (r && r.errors.length) { $('seAdv').open = true; $('seMsg').textContent = '點選式菜單有看不懂的行，請修正或刪除後再儲存'; return; }
+  if (aiCtl) { $('seMsg').textContent = 'AI 還在解析，請稍候'; return; }
+  if (r && r.errors.length) { $('seMsg').textContent = '點選式菜單有看不懂的行，請修正或刪除後再儲存'; return; }
   if (!r && !ed.keep.length && !ed.add.length) { $('seMsg').textContent = '請至少上傳一張菜單照片'; return; }
   $('seSave').disabled = true; $('seMsg').textContent = '儲存中…（照片上傳需要一點時間）';
   try {
@@ -530,6 +560,6 @@ $('seDelete').onclick = async () => {
   }
   await loginFromLink();
   await refresh();
-  setInterval(() => { if (!document.hidden) refresh(); }, 20000);
-  setInterval(recompute, 15000);
+  setInterval(() => { if (!document.hidden && !adminView()) refresh(); }, 20000);
+  setInterval(() => { if (!adminView()) recompute(); }, 15000);
 })();

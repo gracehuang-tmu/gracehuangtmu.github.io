@@ -10,6 +10,25 @@
 
 const MAX_ITEMS = 30;
 const SITE_URL = 'https://gracehuang-lab.com/drink/';
+// 菜單照片 AI 解析：在「專案設定 → 指令碼屬性」新增 GEMINI_API_KEY（到 https://aistudio.google.com/apikey 免費申請）
+// 可選：GEMINI_MODEL 指定模型，預設 gemini-flash-latest
+const MENU_PROMPT = [
+  '你會看到一家飲料店的菜單照片（可能多張）。請完整辨識所有飲品與價格，轉成下面的純文字格式。只輸出轉換結果，不要任何說明或程式碼區塊。',
+  '',
+  '# 分類名稱 分類說明(可省略)',
+  '品名 M價格 L價格          ← 兩種尺寸，例：珍珠奶茶 M50 L60（菜單寫中杯/大杯也用 M/L）',
+  '品名 價格                 ← 只有一種價格，例：仙草凍奶 60',
+  '品名 L價格 (紅茶/綠茶)     ← 可選茶底且同價，用括號列出',
+  '品名 +口味A價格 +口味B價格  ← 同一品項不同口味不同價，例：冬瓜綿綿 +鮮奶60 +檸檬45',
+  '品名 L價格 [新品]          ← 有標註時用中括號；限定月份寫 [11-03月]',
+  '',
+  '最後列出菜單上的選項（沒有就省略該行）：',
+  '冰塊: 正常冰 少冰 微冰 去冰 溫 熱',
+  '甜度: 正常糖 少糖 半糖 微糖 無糖',
+  '加料: 珍珠5 椰果10 奶蓋15',
+  '',
+  '規則：使用繁體中文；價格只寫阿拉伯數字；看不清楚的價格不要猜，該品項最後加 [待確認] 並寫最可能的值；不要編造照片上沒有的品項；店名、電話、地址不要輸出。'
+].join('\n');
 
 function setup() {
   const p = PropertiesService.getScriptProperties();
@@ -29,6 +48,7 @@ function setup() {
     p.setProperty('ADMIN_KEY', Utilities.getUuid().replace(/-/g, '').slice(0, 10));
   }
   imageFolder();
+  if (!p.getProperty('GEMINI_API_KEY')) Logger.log('提醒：尚未設定 GEMINI_API_KEY，上傳菜單照片後無法自動解析（其他功能不受影響）。');
   Logger.log('試算表網址：' + SpreadsheetApp.openById(p.getProperty('SHEET_ID')).getUrl());
   Logger.log('團主密碼：' + p.getProperty('ADMIN_KEY'));
   Logger.log('團主邀請連結（私訊給團主，點開即登入）：' + SITE_URL + '#key=' + p.getProperty('ADMIN_KEY'));
@@ -95,6 +115,36 @@ function doPost(e) {
       if (cfg.openAt && cfg.closeAt && cfg.closeAt <= cfg.openAt) return out({ ok: false, error: 'bad_time' });
       ss.getSheetByName('config').getRange('A1').setValue(JSON.stringify(cfg));
       return out({ ok: true });
+    }
+    if (action === 'parseMenu') {
+      const key = p.getProperty('GEMINI_API_KEY');
+      if (!key) return out({ ok: false, error: 'no_ai_key' });
+      const parts = [{ text: MENU_PROMPT }];
+      const keep = Array.isArray(req.keepImages) ? req.keepImages.map(String) : [];
+      const known = allImageIds(ss);
+      keep.filter(id => known.indexOf(id) >= 0).slice(0, 6).forEach(id => {
+        const b = DriveApp.getFileById(id).getBlob();
+        parts.push({ inline_data: { mime_type: b.getContentType(), data: Utilities.base64Encode(b.getBytes()) } });
+      });
+      (Array.isArray(req.newImages) ? req.newImages : []).slice(0, 6).forEach(d => {
+        const m = /^data:(image\/(?:jpeg|png|webp));base64,([A-Za-z0-9+\/=]+)$/.exec(String(d));
+        if (m && m[2].length <= 3500000) parts.push({ inline_data: { mime_type: m[1], data: m[2] } });
+      });
+      if (parts.length < 2) return out({ ok: false, error: 'no_image' });
+      const model = p.getProperty('GEMINI_MODEL') || 'gemini-flash-latest';
+      const res = UrlFetchApp.fetch('https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(model) + ':generateContent', {
+        method: 'post', contentType: 'application/json', muteHttpExceptions: true,
+        headers: { 'x-goog-api-key': key },
+        payload: JSON.stringify({ contents: [{ role: 'user', parts: parts }], generationConfig: { temperature: 0.1 } })
+      });
+      const code = res.getResponseCode();
+      if (code === 429) return out({ ok: false, error: 'ai_busy' });
+      if (code !== 200) return out({ ok: false, error: 'ai_error', detail: String(code) + ' ' + res.getContentText().slice(0, 300) });
+      let text = '';
+      try { text = JSON.parse(res.getContentText()).candidates[0].content.parts.map(x => x.text || '').join(''); } catch (e) {}
+      text = text.replace(/^```[a-z]*\n?|```$/gm, '').trim().slice(0, 30000);
+      if (!text) return out({ ok: false, error: 'ai_empty' });
+      return out({ ok: true, text: text });
     }
     if (action === 'saveMenu') {
       const shop = clip(req.shop, 30);
