@@ -361,6 +361,9 @@ function renderDeadline() {
 }
 function toLocalInput(t) { if (!t) return ''; const d = new Date(t); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 16); }
 function fromLocalInput(v) { if (!v) return null; const t = new Date(v).getTime(); return isNaN(t) ? null : t; }
+// 團主正在編輯的欄位：自動更新不覆蓋，直到按下儲存
+const dirty = { cfgOpenAt: false, cfgCloseAt: false, cfgNote: false };
+['cfgOpenAt', 'cfgCloseAt', 'cfgNote'].forEach(id => ['input', 'change'].forEach(ev => $(id).addEventListener(ev, () => { dirty[id] = true; $('cfgSave').textContent = '儲存設定（尚未儲存）'; })));
 function renderCfg() {
   const ph = phase();
   if (ph === 'open') setStatus('點餐中', 'check_circle', 'open');
@@ -369,11 +372,12 @@ function renderCfg() {
   renderDeadline();
   renderTitle();
   renderShopSelect();
-  if (document.activeElement !== $('cfgOpenAt')) $('cfgOpenAt').value = toLocalInput(openAt);
-  if (document.activeElement !== $('cfgCloseAt')) $('cfgCloseAt').value = toLocalInput(closeAt);
+  if (!dirty.cfgOpenAt) $('cfgOpenAt').value = toLocalInput(openAt);
+  if (!dirty.cfgCloseAt) $('cfgCloseAt').value = toLocalInput(closeAt);
   showNoteLine();
   $('cfgToggle').textContent = manualOpen ? '暫停點餐' : '恢復點餐';
-  if (document.activeElement !== $('cfgNote')) $('cfgNote').value = cfgNote;
+  if (!dirty.cfgNote) $('cfgNote').value = cfgNote;
+  $('cfgSave').textContent = Object.values(dirty).some(Boolean) ? '儲存設定（尚未儲存）' : '儲存設定';
 }
 
 // ---------- 團主 ----------
@@ -406,13 +410,15 @@ async function loginFromLink() {
 }
 $('adminOut').onclick = () => { adminKey = ''; ls('drink_admin', null); renderAdmin(); };
 async function adminDo(action, payload, msg) {
-  try { const r = await api(action, payload); $('adminMsg').textContent = r.ok ? msg : (r.error === 'bad_time' ? '截團時間要晚於開放時間' : '操作失敗（' + (r.error || '') + '）'); } catch { $('adminMsg').textContent = '連線失敗'; }
-  setTimeout(() => $('adminMsg').textContent = '', 3000); refresh();
+  let ok = false;
+  try { const r = await api(action, payload); ok = !!r.ok; $('adminMsg').textContent = r.ok ? msg : (r.error === 'bad_time' ? '截團時間要晚於開放時間' : '操作失敗（' + (r.error || '') + '）'); } catch { $('adminMsg').textContent = '連線失敗'; }
+  setTimeout(() => $('adminMsg').textContent = '', 3000);
+  await refresh(); return ok;
 }
 $('cfgSave').onclick = () => {
   const oa = fromLocalInput($('cfgOpenAt').value), ca = fromLocalInput($('cfgCloseAt').value);
   if (oa && ca && ca <= oa) { $('adminMsg').textContent = '截團時間要晚於開放時間'; return; }
-  adminDo('config', { shop: $('cfgShop').value, note: $('cfgNote').value.trim(), openAt: oa, closeAt: ca }, '已儲存');
+  adminDo('config', { note: $('cfgNote').value.trim(), openAt: oa, closeAt: ca }, '已儲存').then(ok => { if (ok) { Object.keys(dirty).forEach(k => dirty[k] = false); renderCfg(); } });
 };
 $('cfgToggle').onclick = () => adminDo('config', { open: !manualOpen }, manualOpen ? '已暫停點餐' : '已恢復點餐');
 $('cfgClear').onclick = () => $('clearConfirm').classList.remove('hide');
@@ -422,7 +428,7 @@ $('byPerson').addEventListener('click', e => { const b = e.target.closest('[data
 
 // ---------- 團主：商家與菜單 ----------
 function renderShopSelect() {
-  const el = $('cfgShop'); if (document.activeElement === el) return;
+  const el = $('cfgShop'); if (document.activeElement === el || el.dataset.busy) return;
   const list = [...new Set([...shops, ...(cfgShop ? [cfgShop] : [])])];
   el.innerHTML = `<option value="">（初始菜單）</option>` + list.map(n => `<option value="${esc(n)}">${esc(n)}</option>`).join('');
   el.value = cfgShop;
