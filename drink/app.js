@@ -388,6 +388,22 @@ $('loginBtn').onclick = async () => {
   try { const r = await api('adminCheck'); if (r.ok) { ls('drink_admin', k); $('adminKey').value = ''; renderAdmin(); return; } adminKey = prev; $('loginMsg').textContent = '密碼錯誤'; return; } catch {}
   adminKey = prev; $('loginMsg').textContent = '無法連線，請稍後再試';
 };
+$('inviteBtn').onclick = async () => {
+  const link = location.origin + location.pathname + '#key=' + encodeURIComponent(adminKey);
+  try { await navigator.clipboard.writeText(link); $('inviteMsg').textContent = '已複製'; } catch { $('inviteMsg').textContent = link; }
+  setTimeout(() => { if ($('inviteMsg').textContent === '已複製') $('inviteMsg').textContent = ''; }, 2500);
+};
+// 從邀請連結登入：讀取網址中的 #key=，驗證後記住，並立刻從網址列移除
+async function loginFromLink() {
+  const m = /^#key=([^&]+)/.exec(location.hash);
+  if (!m) return;
+  history.replaceState(null, '', location.pathname + location.search);
+  const k = decodeURIComponent(m[1]).trim().slice(0, 64);
+  if (!API || !k) return;
+  const prev = adminKey; adminKey = k;
+  try { const r = await api('adminCheck'); if (r.ok) { ls('drink_admin', k); renderAdmin(); note('已用邀請連結登入團主，設定在「全部彙整」頁。'); return; } } catch {}
+  adminKey = prev; note('團主邀請連結無效或已更換，請向系統管理員索取新連結。');
+}
 $('adminOut').onclick = () => { adminKey = ''; ls('drink_admin', null); renderAdmin(); };
 async function adminDo(action, payload, msg) {
   try { const r = await api(action, payload); $('adminMsg').textContent = r.ok ? msg : (r.error === 'bad_time' ? '截團時間要晚於開放時間' : '操作失敗（' + (r.error || '') + '）'); } catch { $('adminMsg').textContent = '連線失敗'; }
@@ -506,6 +522,7 @@ $('seDelete').onclick = async () => {
     n.innerHTML = '<div>點餐系統尚未啟用，暫時只能瀏覽菜單。</div>';
     return;
   }
+  await loginFromLink();
   await refresh();
   setInterval(() => { if (!document.hidden) refresh(); }, 20000);
   setInterval(recompute, 15000);

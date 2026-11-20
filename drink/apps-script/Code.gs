@@ -9,6 +9,7 @@
  */
 
 const MAX_ITEMS = 30;
+const SITE_URL = 'https://gracehuang-lab.com/drink/';
 
 function setup() {
   const p = PropertiesService.getScriptProperties();
@@ -30,6 +31,7 @@ function setup() {
   imageFolder();
   Logger.log('試算表網址：' + SpreadsheetApp.openById(p.getProperty('SHEET_ID')).getUrl());
   Logger.log('團主密碼：' + p.getProperty('ADMIN_KEY'));
+  Logger.log('團主邀請連結（私訊給團主，點開即登入）：' + SITE_URL + '#key=' + p.getProperty('ADMIN_KEY'));
 }
 
 function doGet() {
