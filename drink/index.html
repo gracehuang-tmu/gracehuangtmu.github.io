@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>飲料團購點餐</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--g:#5b7a3a;--g2:#eef3e6;--ink:#2b2b2b;--mut:#777;--line:#e3e3dc;--bg:#faf9f5;--red:#c0392b}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Noto Sans TC",system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:15px}
+header{background:var(--g);color:#fff;padding:14px 16px 0;position:sticky;top:0;z-index:5}
+header h1{margin:0 0 4px;font-size:19px}
+#status{font-size:13px;opacity:.9;min-height:18px}
+.tabs{display:flex;gap:4px;margin-top:10px}
+.tabs button{flex:1;border:0;background:transparent;color:#dfe8d3;padding:10px;font:inherit;font-weight:500;border-bottom:3px solid transparent;cursor:pointer}
+.tabs button.on{color:#fff;border-color:#fff}
+main{max-width:760px;margin:0 auto;padding:12px 12px 120px}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:12px}
+.who{display:flex;gap:8px;align-items:center}
+.who input{flex:1}
+input,textarea,select{font:inherit;border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%;background:#fff}
+.catnav{display:flex;gap:6px;overflow-x:auto;padding:4px 0 8px;scrollbar-width:none}
+.catnav a{white-space:nowrap;background:var(--g2);color:var(--g);border-radius:20px;padding:5px 12px;text-decoration:none;font-size:13px}
+h2{font-size:17px;margin:18px 4px 8px;color:var(--g)}
+h2 small{font-weight:400;color:var(--mut);font-size:12px;margin-left:6px}
+.item{display:flex;justify-content:space-between;align-items:center;padding:11px 14px;background:#fff;border:1px solid var(--line);border-radius:10px;margin-bottom:6px;cursor:pointer}
+.item:hover{border-color:var(--g)}
+.item.off{opacity:.45;cursor:not-allowed}
+.item .n{font-weight:500}
+.item .tag{font-size:11px;color:var(--mut);margin-left:6px}
+.item .p{color:var(--g);font-weight:700;white-space:nowrap}
+.btn{border:0;border-radius:8px;padding:9px 14px;font:inherit;font-weight:500;cursor:pointer;background:var(--g);color:#fff}
+.btn.ghost{background:var(--g2);color:var(--g)}
+.btn.danger{background:#fbeaea;color:var(--red)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.cartbar{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);padding:10px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px;z-index:6}
+.sheet-bg{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;z-index:10;align-items:flex-end;justify-content:center}
+.sheet-bg.show{display:flex}
+.sheet{background:#fff;width:100%;max-width:560px;max-height:88vh;overflow:auto;border-radius:16px 16px 0 0;padding:16px}
+.sheet h3{margin:0 0 4px;font-size:18px}
+.grp{margin:12px 0}
+.grp label.t{display:block;font-size:13px;color:var(--mut);margin-bottom:6px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips button{border:1px solid var(--line);background:#fff;border-radius:18px;padding:6px 12px;font:inherit;font-size:14px;cursor:pointer}
+.chips button.on{background:var(--g);border-color:var(--g);color:#fff}
+.qty{display:flex;align-items:center;gap:12px}
+.qty button{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:#fff;font-size:18px;cursor:pointer}
+.line{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line)}
+.line:last-child{border-bottom:0}
+.line .d{font-size:13px;color:var(--mut)}
+.x{border:0;background:none;color:var(--red);cursor:pointer;font-size:13px}
+.tot{display:flex;justify-content:space-between;font-weight:700;margin-top:8px}
+pre{white-space:pre-wrap;background:var(--g2);padding:12px;border-radius:8px;font-family:inherit;font-size:14px;margin:8px 0}
+.muted{color:var(--mut);font-size:13px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.hide{display:none!important}
+.notice{background:#fff7e0;border:1px solid #f1dfa5;color:#7a5d00;border-radius:8px;padding:8px 12px;font-size:13px;margin-bottom:10px}
+</style>
+</head>
+<body>
+<header>
+  <h1 id="title">🧋 飲料團購點餐</h1>
+  <div id="status">載入中…</div>
+  <div class="tabs"><button id="tabMenu" class="on">點餐</button><button id="tabMine">我的訂單</button><button id="tabAll">全部彙整</button></div>
+</header>
+<main>
+  <div id="notice" class="notice hide"></div>
+  <section id="vMenu">
+    <div class="card who"><span>👤</span><input id="nick" placeholder="你的名字（取飲料時叫你）" maxlength="20"></div>
+    <div class="catnav" id="catnav"></div>
+    <div id="menu"></div>
+    <p class="muted" id="menuFoot"></p>
+  </section>
+  <section id="vMine" class="hide">
+    <div class="card"><div id="mine"></div></div>
+  </section>
+  <section id="vAll" class="hide">
+    <div id="adminBox" class="card hide">
+      <b>團主設定</b>
+      <div class="grp"><label class="t">截止時間 / 備註</label><input id="cfgNote" maxlength="80" placeholder="例：11:30 截止，12:30 到貨"></div>
+      <div class="row">
+        <button class="btn ghost" id="cfgSave">儲存備註</button>
+        <button class="btn ghost" id="cfgToggle">關閉點餐</button>
+        <button class="btn danger" id="cfgClear">清空全部訂單</button>
+        <button class="btn ghost" id="adminOut">登出團主</button>
+      </div>
+      <div id="clearConfirm" class="row hide" style="margin-top:8px"><span class="muted">確定刪除所有人的訂單？</span><button class="btn danger" id="clearYes">確定清空</button><button class="btn ghost" id="clearNo">取消</button></div>
+      <div id="adminMsg" class="muted"></div>
+    </div>
+    <div class="card"><div class="row" style="justify-content:space-between"><b>叫貨清單（同品項合併）</b><button class="btn ghost" id="refresh">重新整理</button></div><pre id="merged"></pre><button class="btn ghost" id="copyBtn">複製叫貨清單</button> <span id="copyMsg" class="muted"></span></div>
+    <div class="card"><b>依人分列</b><div id="byPerson"></div></div>
+    <div id="loginBox" class="row" style="margin:16px 4px"><a href="#" id="loginLink" class="muted">團主登入</a></div>
+    <div id="loginForm" class="card hide"><div class="row"><input id="adminKey" type="password" placeholder="團主密碼" style="flex:1"><button class="btn" id="loginBtn">登入</button></div><div id="loginMsg" class="muted"></div></div>
+  </section>
+</main>
+<div class="cartbar" id="cartbar"><div><b id="cbCount">0 杯</b> <span class="muted" id="cbSum">$0</span></div><button class="btn" id="cbGo">查看我的訂單</button></div>
+<div class="sheet-bg" id="sheetBg"><div class="sheet" id="sheet"></div></div>
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
