@@ -10,8 +10,9 @@
 
 const MAX_ITEMS = 30;
 const SITE_URL = 'https://gracehuang-lab.com/drink/';
-// 菜單照片 AI 解析：在「專案設定 → 指令碼屬性」新增 GEMINI_API_KEY（到 https://aistudio.google.com/apikey 免費申請）
-// 可選：GEMINI_MODEL 指定模型，預設 gemini-flash-latest
+// 菜單照片 AI 解析（Claude）：在「專案設定 → 指令碼屬性」新增 ANTHROPIC_API_KEY（到 https://platform.claude.com 申請）
+// 可選：CLAUDE_MODEL 指定模型，預設 claude-sonnet-5-5（較省：claude-haiku-5-5）
+// 備用：沒有 ANTHROPIC_API_KEY 但有 GEMINI_API_KEY 時改用 Gemini（GEMINI_MODEL 預設 gemini-flash-latest）
 const MENU_PROMPT = [
   '你會看到一家飲料店的菜單照片（可能多張）。請完整辨識所有飲品與價格，轉成下面的純文字格式。只輸出轉換結果，不要任何說明或程式碼區塊。',
   '',
@@ -48,7 +49,7 @@ function setup() {
     p.setProperty('ADMIN_KEY', Utilities.getUuid().replace(/-/g, '').slice(0, 10));
   }
   imageFolder();
-  if (!p.getProperty('GEMINI_API_KEY')) Logger.log('提醒：尚未設定 GEMINI_API_KEY，上傳菜單照片後無法自動解析（其他功能不受影響）。');
+  if (!p.getProperty('ANTHROPIC_API_KEY') && !p.getProperty('GEMINI_API_KEY')) Logger.log('提醒：尚未設定 ANTHROPIC_API_KEY，上傳菜單照片後無法自動解析（其他功能不受影響）。');
   Logger.log('試算表網址：' + SpreadsheetApp.openById(p.getProperty('SHEET_ID')).getUrl());
   Logger.log('團主密碼：' + p.getProperty('ADMIN_KEY'));
   Logger.log('團主邀請連結（私訊給團主，點開即登入）：' + SITE_URL + '#key=' + p.getProperty('ADMIN_KEY'));
@@ -117,34 +118,26 @@ function doPost(e) {
       return out({ ok: true });
     }
     if (action === 'parseMenu') {
-      const key = p.getProperty('GEMINI_API_KEY');
-      if (!key) return out({ ok: false, error: 'no_ai_key' });
-      const parts = [{ text: MENU_PROMPT }];
+      const claudeKey = p.getProperty('ANTHROPIC_API_KEY'), geminiKey = p.getProperty('GEMINI_API_KEY');
+      if (!claudeKey && !geminiKey) return out({ ok: false, error: 'no_ai_key' });
+      const imgs = [];
       const keep = Array.isArray(req.keepImages) ? req.keepImages.map(String) : [];
       const known = allImageIds(ss);
       keep.filter(id => known.indexOf(id) >= 0).slice(0, 6).forEach(id => {
         const b = DriveApp.getFileById(id).getBlob();
-        parts.push({ inline_data: { mime_type: b.getContentType(), data: Utilities.base64Encode(b.getBytes()) } });
+        imgs.push({ mime: b.getContentType(), data: Utilities.base64Encode(b.getBytes()) });
       });
-      (Array.isArray(req.newImages) ? req.newImages : []).slice(0, 6).forEach(d => {
+      (Array.isArray(req.newImages) ? req.newImages : []).slice(0, 6 - imgs.length).forEach(d => {
         const m = /^data:(image\/(?:jpeg|png|webp));base64,([A-Za-z0-9+\/=]+)$/.exec(String(d));
-        if (m && m[2].length <= 3500000) parts.push({ inline_data: { mime_type: m[1], data: m[2] } });
+        if (m && m[2].length <= 3500000) imgs.push({ mime: m[1], data: m[2] });
       });
-      if (parts.length < 2) return out({ ok: false, error: 'no_image' });
-      const model = p.getProperty('GEMINI_MODEL') || 'gemini-flash-latest';
-      const res = UrlFetchApp.fetch('https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(model) + ':generateContent', {
-        method: 'post', contentType: 'application/json', muteHttpExceptions: true,
-        headers: { 'x-goog-api-key': key },
-        payload: JSON.stringify({ contents: [{ role: 'user', parts: parts }], generationConfig: { temperature: 0.1 } })
-      });
-      const code = res.getResponseCode();
-      if (code === 429) return out({ ok: false, error: 'ai_busy' });
-      if (code !== 200) return out({ ok: false, error: 'ai_error', detail: String(code) + ' ' + res.getContentText().slice(0, 300) });
-      let text = '';
-      try { text = JSON.parse(res.getContentText()).candidates[0].content.parts.map(x => x.text || '').join(''); } catch (e) {}
-      text = text.replace(/^```[a-z]*\n?|```$/gm, '').trim().slice(0, 30000);
+      if (!imgs.length) return out({ ok: false, error: 'no_image' });
+      const r = claudeKey ? callClaude(claudeKey, p.getProperty('CLAUDE_MODEL') || 'claude-sonnet-5-5', imgs)
+                          : callGemini(geminiKey, p.getProperty('GEMINI_MODEL') || 'gemini-flash-latest', imgs);
+      if (r.error) return out({ ok: false, error: r.error, detail: r.detail || '' });
+      const text = r.text.replace(/^```[a-z]*\n?|```$/gm, '').trim().slice(0, 30000);
       if (!text) return out({ ok: false, error: 'ai_empty' });
-      return out({ ok: true, text: text });
+      return out({ ok: true, text: text, provider: claudeKey ? 'claude' : 'gemini' });
     }
     if (action === 'saveMenu') {
       const shop = clip(req.shop, 30);
@@ -214,6 +207,35 @@ function listOrders(ss) {
     try { items = JSON.parse(r[6]); } catch (e) {}
     return { id: String(r[0]), name: String(r[1]).replace(/^'/, ''), items: items, updatedAt: r[5] };
   });
+}
+function callClaude(key, model, imgs) {
+  const content = imgs.map(i => ({ type: 'image', source: { type: 'base64', media_type: i.mime, data: i.data } }));
+  content.push({ type: 'text', text: MENU_PROMPT });
+  const res = UrlFetchApp.fetch('https://api.anthropic.com/v1/messages', {
+    method: 'post', contentType: 'application/json', muteHttpExceptions: true,
+    headers: { 'x-api-key': key, 'anthropic-version': '2023-06-01' },
+    payload: JSON.stringify({ model: model, max_tokens: 8000, messages: [{ role: 'user', content: content }] })
+  });
+  const code = res.getResponseCode();
+  if (code === 429 || code === 529) return { error: 'ai_busy' };
+  if (code === 401 || code === 403) return { error: 'ai_key_invalid' };
+  if (code !== 200) return { error: 'ai_error', detail: code + ' ' + res.getContentText().slice(0, 300) };
+  try { return { text: JSON.parse(res.getContentText()).content.filter(b => b.type === 'text').map(b => b.text).join('') }; }
+  catch (e) { return { error: 'ai_empty' }; }
+}
+function callGemini(key, model, imgs) {
+  const parts = [{ text: MENU_PROMPT }].concat(imgs.map(i => ({ inline_data: { mime_type: i.mime, data: i.data } })));
+  const res = UrlFetchApp.fetch('https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(model) + ':generateContent', {
+    method: 'post', contentType: 'application/json', muteHttpExceptions: true,
+    headers: { 'x-goog-api-key': key },
+    payload: JSON.stringify({ contents: [{ role: 'user', parts: parts }], generationConfig: { temperature: 0.1 } })
+  });
+  const code = res.getResponseCode();
+  if (code === 429) return { error: 'ai_busy' };
+  if (code === 400 || code === 403) return { error: 'ai_key_invalid', detail: res.getContentText().slice(0, 300) };
+  if (code !== 200) return { error: 'ai_error', detail: code + ' ' + res.getContentText().slice(0, 300) };
+  try { return { text: JSON.parse(res.getContentText()).candidates[0].content.parts.map(x => x.text || '').join('') }; }
+  catch (e) { return { error: 'ai_empty' }; }
 }
 function menuSheet(ss) {
   let m = ss.getSheetByName('menus');

@@ -13,7 +13,7 @@
 2. 函式選單選 `setup` →「執行」，授權：審查權限 → 選帳號 → 進階 → 前往（不安全）→ 允許。執行紀錄會顯示團主密碼與試算表網址。
 3. 「部署」→「新增部署作業」→ 網頁應用程式；執行身分「我」、存取權「所有人」→ 部署。
 4. 把 `https://script.google.com/macros/s/…/exec` 填入 `config.js`。
-5. 菜單照片 AI 解析（免費、不需信用卡）：到 https://aistudio.google.com/apikey 建立 API 金鑰 → Apps Script「專案設定」→「指令碼屬性」新增 `GEMINI_API_KEY` = 金鑰。免費方案送出的資料可能被 Google 用於改進產品。
+5. 菜單照片 AI 解析（Claude，按用量付費）：到 https://platform.claude.com 購買額度並建立 API 金鑰 → Apps Script「專案設定」→「指令碼屬性」新增 `ANTHROPIC_API_KEY` = 金鑰。預設模型 `claude-sonnet-5-5`；想省錢可再新增 `CLAUDE_MODEL` = `claude-haiku-5-5`。
 6. 把團主密碼交給要開團的同事（所有團主共用）。改密碼：Apps Script「專案設定」→「指令碼屬性」→ `ADMIN_KEY`。
 
 更新 Code.gs 後：「部署」→「管理部署作業」→ 編輯 → 版本選「新版本」→ 部署，網址不變。

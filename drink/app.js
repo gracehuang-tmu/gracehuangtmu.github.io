@@ -512,7 +512,7 @@ async function parseWithAI() {
       const unsure = (r.text.match(/待確認/g) || []).length;
       $('seAiMsg').textContent = n ? `解析完成：${n} 個品項${unsure ? `，${unsure} 項待確認` : ''}。請核對後儲存。` : '沒有解析到品項，請換一張更清楚的照片，或手動填寫。';
     } else {
-      const msg = { no_ai_key: '尚未設定 AI 金鑰，請聯絡系統管理員；也可以先手動填寫或改用下方其他 AI 工具。', ai_busy: 'AI 使用量暫時達上限，請過一分鐘再試。', ai_empty: 'AI 沒有回應內容，請再試一次。', no_image: '請先上傳菜單照片', not_admin: '團主登入已失效，請重新登入' };
+      const msg = { no_ai_key: '尚未設定 AI 金鑰，請聯絡系統管理員；也可以先手動填寫或改用下方其他 AI 工具。', ai_busy: 'AI 目前忙碌或已達用量上限，請過一分鐘再試。', ai_key_invalid: 'AI 金鑰無效或額度不足，請聯絡系統管理員。', ai_empty: 'AI 沒有回應內容，請再試一次。', no_image: '請先上傳菜單照片', not_admin: '團主登入已失效，請重新登入' };
       $('seAiMsg').textContent = msg[r.error] || 'AI 解析失敗，請再試一次。';
     }
   } catch { if (aiCtl === my) $('seAiMsg').textContent = '連線失敗，請再試一次。'; }
