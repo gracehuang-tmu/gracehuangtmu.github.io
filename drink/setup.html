@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>團主使用說明・飲料團購點餐</title>
+<link rel="stylesheet" href="style.css">
+<style>
+ol.steps { margin: 0; padding-left: 1.4em; }
+ol.steps > li { padding: 10px 0; border-top: 1px solid var(--mist); }
+ol.steps > li:first-child { border-top: 0; padding-top: 0; }
+ol.steps b { font-weight: 500; }
+ul.sub { margin: 6px 0 0; padding-left: 1.2em; color: var(--graphite); font-size: 14px; letter-spacing: .238px; }
+code { font-family: ui-monospace, Menlo, monospace; font-size: 13px; background: var(--canvas); padding: 1px 6px; border-radius: var(--r-md); word-break: break-all; }
+.phase { font-size: 12px; letter-spacing: .432px; color: var(--slate); margin: 0 0 4px; }
+</style>
+</head>
+<body>
+<header class="tt-nav">
+  <div class="tt-nav-inner">
+    <div class="tt-brand"><span class="tt-brand-icon"><span class="tt-icon">menu_book</span></span><span class="tt-brand-label">團主使用說明</span></div>
+    <a class="link" href="./">回點餐頁</a>
+  </div>
+</header>
+<main>
+  <div class="card">
+    <p class="phase">第一次設定（只做一次，需用電腦，約 5 分鐘）</p>
+    <h2 class="card-title">啟用後端</h2>
+    <ol class="steps">
+      <li><b>建立 Apps Script 專案</b>：打開 <a class="link" href="https://script.google.com" target="_blank" rel="noopener">script.google.com</a> → 新專案，刪掉原本的 <code>function myFunction() {}</code>。</li>
+      <li><b>貼上程式並儲存</b>：打開 <a class="link" href="https://raw.githubusercontent.com/gracehuang-tmu/gracehuangtmu.github.io/main/drink/apps-script/Code.gs" target="_blank" rel="noopener">Code.gs 純文字版</a>，全選複製、貼上，按 Ctrl+S（Mac：⌘+S）。</li>
+      <li><b>執行 setup</b>：工具列函式選單選 <code>setup</code> → 按「執行」，依序授權：審查權限 → 選帳號 → 進階 → 前往（不安全）→ 允許。
+        <ul class="sub"><li>下方「執行紀錄」會顯示<b>團主密碼</b>與試算表網址，請記下密碼。</li><li>函式選單沒有 setup：通常是還沒存檔，或手機版編輯器不支援。</li></ul></li>
+      <li><b>部署</b>：右上「部署」→「新增部署作業」→ 齒輪選「網頁應用程式」；執行身分「我」、存取權「所有人」→ 部署 → 授權存取。</li>
+      <li><b>把網址交給 Claude</b>：複製 <code>https://script.google.com/macros/s/…/exec</code>，貼給 Claude；Claude 會填入 <code>config.js</code> 並送一筆測試訂單確認。
+        <ul class="sub"><li>完成後點餐頁上方會顯示「點餐中」，不再出現「尚未開放」提示。</li></ul></li>
+      <li><b>團主登入</b>：點餐頁右上角 <span class="tt-icon" style="font-size:18px">admin_panel_settings</span> 圖示（或「全部彙整」頁底的「團主登入」）→ 輸入團主密碼。同一台裝置會記住登入。</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <p class="phase">每次揪團</p>
+    <h2 class="card-title">開團到叫貨</h2>
+    <ol class="steps">
+      <li><b>換菜單（換店時才需要）</b>：把新菜單照片傳給 Claude，Claude 辨識後更新頁面菜單。</li>
+      <li><b>設定這次的團</b>：「全部彙整」→「團主設定」，填今日訂購商家、開放訂購時間、截團時間、備註（到貨時間、領取地點）→ 儲存設定。</li>
+      <li><b>清掉上一團的訂單</b>：同一區按「清空訂單」。</li>
+      <li><b>分享連結</b>：把 <code>https://gracehuang-lab.com/drink/</code> 貼到 LINE 群組。同事不需登入，輸入名字點飲料就會自動送出，截團前可自行修改。</li>
+      <li><b>截團</b>：到截團時間自動關閉；需要提早結束可按「暫停點餐」。</li>
+      <li><b>叫貨</b>：「全部彙整」→「複製清單」，貼給店家；「依人分列」可用來收錢。訂單也會同步在你的 Google 試算表。</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h2 class="card-title">常見問題</h2>
+    <ol class="steps">
+      <li><b>同事送不出去</b>：檢查是否已過截團時間或被暫停；否則請對方重新整理頁面。</li>
+      <li><b>忘記團主密碼</b>：回 Apps Script 再執行一次 <code>setup</code>，執行紀錄會再顯示同一組密碼。</li>
+      <li><b>更新了 Code.gs</b>：存檔後要「部署」→「管理部署作業」→ 編輯 → 版本選「新版本」→ 部署，網址不變。</li>
+    </ol>
+  </div>
+</main>
+</body>
+</html>

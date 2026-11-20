@@ -134,3 +134,10 @@ pre { white-space: pre-wrap; background: var(--canvas); padding: var(--s16); bor
 .deadline .tt-icon { flex: none; }
 .deadline b { font-weight: 500; }
 .deadline .muted { display: block; }
+
+.nav-end { display: flex; align-items: center; gap: 4px; flex: none; }
+.iconbtn { width: var(--control); height: var(--control); border-radius: var(--r-chip); border: 0; background: transparent; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; }
+.iconbtn:hover { background: var(--canvas); }
+.iconbtn:hover .tt-icon { color: var(--ink); }
+.iconbtn.on .tt-icon { color: var(--blue-deep); }
+.notice a { color: var(--blue-deep); }

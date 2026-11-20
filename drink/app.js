@@ -252,13 +252,16 @@ function renderCfg() {
 }
 
 // ---------- 團主 ----------
-function renderAdmin() { const on = !!adminKey; $('adminBox').classList.toggle('hide', !on); $('loginBox').classList.toggle('hide', on); $('loginForm').classList.add('hide'); renderAll(); }
+function renderAdmin() { const on = !!adminKey; $('adminBox').classList.toggle('hide', !on); $('loginBox').classList.toggle('hide', on); $('loginForm').classList.add('hide'); $('adminBtn').classList.toggle('on', on); renderAll(); }
+$('adminBtn').onclick = () => { show('All'); if (adminKey) { $('adminBox').scrollIntoView({ block: 'start' }); } else { $('loginForm').classList.remove('hide'); $('loginForm').scrollIntoView({ block: 'center' }); $('adminKey').focus(); } };
 $('loginLink').onclick = e => { e.preventDefault(); $('loginForm').classList.remove('hide'); $('adminKey').focus(); };
+$('adminKey').addEventListener('keydown', e => { if (e.key === 'Enter') $('loginBtn').click(); });
 $('loginBtn').onclick = async () => {
   const k = $('adminKey').value.trim(); if (!k) return;
   const prev = adminKey; adminKey = k;
-  try { const r = await api('adminCheck'); if (r.ok) { ls('drink_admin', k); $('adminKey').value = ''; renderAdmin(); return; } } catch {}
-  adminKey = prev; $('loginMsg').textContent = '密碼錯誤或無法連線';
+  if (!API) { adminKey = prev; $('loginMsg').textContent = '後端尚未啟用，請先完成團主使用說明的「第一次設定」。'; return; }
+  try { const r = await api('adminCheck'); if (r.ok) { ls('drink_admin', k); $('adminKey').value = ''; renderAdmin(); return; } adminKey = prev; $('loginMsg').textContent = '密碼錯誤'; return; } catch {}
+  adminKey = prev; $('loginMsg').textContent = '無法連線，請稍後再試';
 };
 $('adminOut').onclick = () => { adminKey = ''; ls('drink_admin', null); renderAdmin(); };
 async function adminDo(action, payload, msg) {
@@ -282,7 +285,12 @@ $('byPerson').addEventListener('click', e => { const b = e.target.closest('[data
   try { const c = JSON.parse(ls('cart') || '[]'); myItems = itemsOf({ items: c }); } catch {}
   try { MENU = normMenu(await (await fetch('menu.json', { cache: 'no-cache' })).json()) || MENU; } catch { note('菜單載入失敗，請重新整理頁面。'); }
   renderMenu(); renderMine(); renderAll(); renderAdmin();
-  if (!API) { setStatus('尚未開放', 'schedule'); note('團主尚未完成設定，暫時無法送出訂單。'); return; }
+  if (!API) {
+    setStatus('尚未開放', 'schedule');
+    const n = $('notice'); n.classList.remove('hide');
+    n.innerHTML = '<div>點餐系統尚未啟用，暫時只能瀏覽菜單。<br>團主請依 <a href="setup.html">團主使用說明</a> 完成第一次設定。</div>';
+    return;
+  }
   await refresh();
   setInterval(() => { if (!document.hidden) refresh(); }, 20000);
   setInterval(recompute, 15000);

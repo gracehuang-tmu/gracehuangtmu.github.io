@@ -11,7 +11,7 @@
 <header class="tt-nav">
   <div class="tt-nav-inner">
     <div class="tt-brand"><span class="tt-brand-icon"><span class="tt-icon">local_cafe</span></span><span class="tt-brand-label" id="title">飲料團購點餐</span></div>
-    <div class="status" id="status">載入中</div>
+    <div class="nav-end"><div class="status" id="status">載入中</div><button class="iconbtn" id="adminBtn" aria-label="團主" title="團主"><span class="tt-icon">admin_panel_settings</span></button></div>
   </div>
   <div class="tabbar">
     <div class="tt-tabs" role="tablist">
@@ -56,6 +56,7 @@
       </div>
       <div id="clearConfirm" class="row hide" style="margin-top:16px"><span class="muted">確定刪除所有人的訂單？</span><button class="btn danger" id="clearYes">確定清空</button><button class="btn ghost" id="clearNo">取消</button></div>
       <div id="adminMsg" class="muted" style="margin-top:8px"></div>
+      <p class="muted" style="margin:8px 0 0"><a class="link" href="setup.html">團主使用說明</a></p>
     </div>
 
     <div class="card">
@@ -68,9 +69,11 @@
 
     <div id="loginBox" class="foot"><a href="#" id="loginLink" class="link">團主登入</a></div>
     <div id="loginForm" class="card hide">
+      <h2 class="card-title">團主登入</h2>
       <label class="field-label" for="adminKey">團主密碼</label>
       <div class="row" style="flex-wrap:nowrap"><input id="adminKey" type="password"><button class="btn ghost" id="loginBtn">登入</button></div>
       <div id="loginMsg" class="muted" style="margin-top:8px"></div>
+      <p class="muted" style="margin:16px 0 0">第一次使用？<a class="link" href="setup.html">看團主使用說明</a></p>
     </div>
   </section>
 </main>
