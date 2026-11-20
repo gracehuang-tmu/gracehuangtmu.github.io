@@ -43,7 +43,7 @@ async function api(action, payload = {}) {
   return r.json();
 }
 
-function setStatus(t) { $('status').textContent = t; }
+function setStatus(t, icon, cls) { const el = $('status'); el.className = 'status' + (cls ? ' ' + cls : ''); el.innerHTML = (icon ? `<span class="tt-icon">${icon}</span>` : '') + esc(t); el.title = t; }
 function note(t) { const n = $('notice'); if (!t) { n.classList.add('hide'); return; } n.textContent = t; n.classList.remove('hide'); }
 function inSeason(m) { if (!m) return true; const now = new Date().getMonth() + 1; const [a, b] = m; return a <= b ? (now >= a && now <= b) : (now >= a || now <= b); }
 function priceLabel(it) {
@@ -54,16 +54,17 @@ function priceLabel(it) {
 
 // ---------- 菜單 ----------
 function renderMenu() {
-  $('title').textContent = '🧋 ' + (MENU.shop ? MENU.shop + ' 團購點餐' : '飲料團購點餐');
+  $('title').textContent = MENU.shop ? MENU.shop + ' 團購點餐' : '飲料團購點餐';
   $('catnav').innerHTML = MENU.categories.map((g, i) => `<a href="#" data-c="${i}">${esc(g.c)}</a>`).join('');
-  $('menu').innerHTML = MENU.categories.map((g, gi) => `<h2 id="cat${gi}">${esc(g.c)}<small>${esc(g.sub)}</small></h2>` + g.items.map((it, ii) => {
+  $('menu').innerHTML = MENU.categories.map((g, gi) => `<section class="cat" id="cat${gi}"><h2>${esc(g.c)}</h2>${g.sub ? `<p class="sub">${esc(g.sub)}</p>` : '<div style="height:8px"></div>'}` + g.items.map((it, ii) => {
     const off = !inSeason(it.months);
-    return `<div class="item ${off ? 'off' : ''}" data-g="${gi}" data-i="${ii}"><div><span class="n">${esc(it.n)}</span>${it.tag ? `<span class="tag">${esc(it.tag)}${off ? '・非供應期' : ''}</span>` : ''}</div><div class="p">${esc(priceLabel(it))}</div></div>`;
-  }).join('')).join('');
+    return `<div class="item ${off ? 'off' : ''}" data-g="${gi}" data-i="${ii}" role="button" tabindex="${off ? -1 : 0}"><div><span class="n">${esc(it.n)}</span>${it.tag ? `<span class="tag">${esc(it.tag)}${off ? '・非供應期' : ''}</span>` : ''}</div><div class="p">${esc(priceLabel(it))}${off ? '' : '<span class="tt-icon">add_circle</span>'}</div></div>`;
+  }).join('') + '</section>').join('');
   $('menuFoot').textContent = (MENU.tops.length ? '加料：' + MENU.tops.map(t => `${t[0]} +${t[1]}`).join('、') + '。' : '') + '菜單由圖片辨識，價格以店家為準。';
 }
 $('catnav').addEventListener('click', e => { const a = e.target.closest('a'); if (!a) return; e.preventDefault(); $('cat' + a.dataset.c)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
 $('menu').addEventListener('click', e => { const el = e.target.closest('.item'); if (!el || el.classList.contains('off')) return; openSheet(+el.dataset.g, +el.dataset.i); });
+$('menu').addEventListener('keydown', e => { if (e.key !== 'Enter' && e.key !== ' ') return; const el = e.target.closest('.item'); if (!el || el.classList.contains('off')) return; e.preventDefault(); openSheet(+el.dataset.g, +el.dataset.i); });
 
 // ---------- 選項視窗 ----------
 let sel = null;
@@ -92,9 +93,9 @@ function drawSheet() {
   ${MENU.sugar.length ? `<div class="grp"><label class="t">甜度</label>${chips('sugar', MENU.sugar.map(x => [x, x]))}</div>` : ''}
   ${MENU.tops.length ? `<div class="grp"><label class="t">加料（可複選）</label>${chips('tops', MENU.tops.map(x => [x[0], `${x[0]} +${x[1]}`]), true)}</div>` : ''}
   <div class="grp"><label class="t">備註</label><input id="sNote" maxlength="40" value="${esc(s.note)}" placeholder="選填"></div>
-  <div class="grp qty"><button data-q="-1">−</button><b>${s.qty}</b><button data-q="1">＋</button><span class="muted">杯</span></div>
-  <div class="row" style="justify-content:space-between;margin-top:14px"><button class="btn ghost" id="sCancel">取消</button><button class="btn" id="sAdd" ${open ? '' : 'disabled'}>加入 $${unitPrice(s) * s.qty}</button></div>
-  ${!open ? '<p class="muted">團主已關閉點餐。</p>' : ''}`;
+  <div class="grp"><label class="t">杯數</label><div class="qty"><button data-q="-1" aria-label="減少"><span class="tt-icon">remove</span></button><b>${s.qty}</b><button data-q="1" aria-label="增加"><span class="tt-icon">add</span></button></div></div>
+  ${!open ? '<p class="muted" style="margin-top:16px">團主已截止點餐。</p>' : ''}
+  <div class="sheet-foot"><button class="btn ghost" id="sCancel">取消</button><button class="btn" id="sAdd" ${open ? '' : 'disabled'}>加入 $${unitPrice(s) * s.qty}</button></div>`;
 }
 $('sheet').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return;
@@ -122,9 +123,9 @@ let saveState = '', pending = 0;
 function renderMine() {
   $('cbCount').textContent = cupsOf(myItems) + ' 杯'; $('cbSum').textContent = '$' + sumOf(myItems);
   $('mine').innerHTML = myItems.length
-    ? myItems.map(x => `<div class="line"><div><div>${esc(x.name)} ×${+x.qty}</div><div class="d">${esc(spec(x))}${x.note ? '｜' + esc(x.note) : ''}</div></div><div style="text-align:right">$${(+x.unit) * (+x.qty)}<br>${open ? `<button class="x" data-k="${esc(x.k)}">刪除</button>` : ''}</div></div>`).join('')
-      + `<div class="tot"><span>${esc(myNick || '我')} 小計</span><span>$${sumOf(myItems)}</span></div><p class="muted">${esc(saveState)}</p>`
-    : '<p class="muted">還沒點任何飲料，到「點餐」挑一杯吧。</p>';
+    ? myItems.map(x => `<div class="line"><div><div>${esc(x.name)} ×${+x.qty}</div><div class="d">${esc(spec(x))}${x.note ? '｜' + esc(x.note) : ''}</div></div><div class="amt">$${(+x.unit) * (+x.qty)}<br>${open ? `<button class="x" data-k="${esc(x.k)}">刪除</button>` : ''}</div></div>`).join('')
+      + `<div class="tot"><span>${esc(myNick || '我')} 小計</span><span>$${sumOf(myItems)}</span></div><p class="muted ${saveState.startsWith('已送出') ? 'ok' : ''}" style="margin:16px 0 0">${esc(saveState)}</p>`
+    : '<p class="muted empty">還沒點任何飲料，到「點餐」挑一杯吧。</p>';
 }
 $('mine').addEventListener('click', e => { const b = e.target.closest('.x'); if (!b) return; myItems = myItems.filter(x => x.k !== b.dataset.k); save(); renderMine(); });
 
@@ -136,14 +137,14 @@ function renderAll() {
   const lines = [...m.entries()].sort((a, b) => a[0].localeCompare(b[0], 'zh-Hant')).map(([k, q]) => `${k} ×${q}`);
   $('merged').textContent = lines.length ? (MENU.shop ? MENU.shop + '\n' : '') + lines.join('\n') + `\n\n共 ${cups} 杯，總計 $${total}（${people.length} 人）` : '目前還沒有訂單';
   $('byPerson').innerHTML = people.length
-    ? people.map(p => `<div class="line" style="display:block"><div class="row" style="justify-content:space-between"><b>${esc(p.name)}${p.id === myId ? '（我）' : ''}</b><span>$${sumOf(p.items)}${adminKey ? ` <button class="x" data-del="${esc(p.id)}">刪除</button>` : ''}</span></div>${p.items.map(x => `<div class="d">・${esc(x.name)} ×${+x.qty}　${esc(spec(x))}${x.note ? '｜' + esc(x.note) : ''}</div>`).join('')}</div>`).join('')
+    ? people.map(p => `<div class="line" style="display:block"><div class="row" style="justify-content:space-between"><b>${esc(p.name)}${p.id === myId ? '（我）' : ''}</b><span class="amt">$${sumOf(p.items)}${adminKey ? ` <button class="x" data-del="${esc(p.id)}">刪除</button>` : ''}</span></div>${p.items.map(x => `<div class="d">・${esc(x.name)} ×${+x.qty}　${esc(spec(x))}${x.note ? '｜' + esc(x.note) : ''}</div>`).join('')}</div>`).join('')
       + `<div class="tot"><span>合計 ${cups} 杯</span><span>$${total}</span></div>`
-    : '<p class="muted">目前還沒有訂單</p>';
+    : '<p class="muted empty">目前還沒有訂單</p>';
 }
 $('copyBtn').addEventListener('click', async () => { try { await navigator.clipboard.writeText($('merged').textContent); $('copyMsg').textContent = '已複製'; } catch { $('copyMsg').textContent = '無法自動複製，請長按上方文字選取'; } setTimeout(() => $('copyMsg').textContent = '', 2500); });
 
 // ---------- 分頁 ----------
-function show(v) { ['Menu', 'Mine', 'All'].forEach(n => { $('v' + n).classList.toggle('hide', n !== v); $('tab' + n).classList.toggle('on', n === v); }); $('cartbar').classList.toggle('hide', v !== 'Menu'); window.scrollTo(0, 0); if (v === 'All') refresh(); }
+function show(v) { ['Menu', 'Mine', 'All'].forEach(n => { $('v' + n).classList.toggle('hide', n !== v); $('tab' + n).setAttribute('aria-selected', String(n === v)); }); $('cartbar').classList.toggle('hide', v !== 'Menu'); window.scrollTo(0, 0); if (v === 'All') refresh(); }
 $('tabMenu').onclick = () => show('Menu'); $('tabMine').onclick = () => show('Mine'); $('tabAll').onclick = () => show('All'); $('cbGo').onclick = () => show('Mine');
 
 // ---------- 儲存 ----------
@@ -158,7 +159,7 @@ function save() {
   saving = saving.then(async () => {
     try {
       const r = await api('save', { id: myId, token: myToken, name: myNick || $('nick').value.trim(), items });
-      if (r.ok) { saveState = items.length ? '✅ 已送出，團主可在「全部彙整」看到。可隨時修改。' : '已取消訂單。'; ls('submitted', items.length ? '1' : '0'); note(''); }
+      if (r.ok) { saveState = items.length ? '已送出，團主可在「全部彙整」看到，之後仍可修改。' : '已取消訂單。'; ls('submitted', items.length ? '1' : '0'); note(''); }
       else if (r.error === 'closed') { saveState = '團主已截止，這次修改沒有送出。'; }
       else if (r.error === 'forbidden') { saveState = '無法修改這筆訂單，請聯絡團主。'; }
       else saveState = '送出失敗，請稍後再試。';
@@ -169,6 +170,11 @@ function save() {
 
 // ---------- 讀取狀態 ----------
 let refreshing = false;
+function showNoteLine() {
+  let el = $('noteLine');
+  if (!el) { el = document.createElement('p'); el.id = 'noteLine'; el.className = 'note-line'; $('vMenu').prepend(el); }
+  el.textContent = cfgNote ? '團主備註：' + cfgNote : ''; el.classList.toggle('hide', !cfgNote);
+}
 async function refresh() {
   if (!API || refreshing) return;
   refreshing = true;
@@ -182,12 +188,13 @@ async function refresh() {
       if (mine && !myItems.length && !pending) { myItems = itemsOf(mine); if (!$('nick').value) { $('nick').value = str(mine.name, 20); myNick = $('nick').value; } }
       renderCfg(); renderAll(); renderMine();
     }
-  } catch { setStatus('⚠️ 無法連線，請稍後重新整理'); }
+  } catch { setStatus('無法連線', 'cloud_off'); }
   refreshing = false;
 }
 $('refresh').onclick = refresh;
 function renderCfg() {
-  setStatus([open ? '🟢 點餐中' : '🔴 已截止', cfgNote].filter(Boolean).join('｜'));
+  setStatus(open ? '點餐中' : '已截止', open ? 'check_circle' : 'block', open ? 'open' : '');
+  showNoteLine();
   $('cfgToggle').textContent = open ? '關閉點餐' : '重新開放點餐';
   if (document.activeElement !== $('cfgNote')) $('cfgNote').value = cfgNote;
 }
@@ -219,7 +226,7 @@ $('byPerson').addEventListener('click', e => { const b = e.target.closest('[data
   try { const c = JSON.parse(ls('cart') || '[]'); myItems = itemsOf({ items: c }); } catch {}
   try { MENU = normMenu(await (await fetch('menu.json', { cache: 'no-cache' })).json()) || MENU; } catch { note('菜單載入失敗，請重新整理頁面。'); }
   renderMenu(); renderMine(); renderAll(); renderAdmin();
-  if (!API) { setStatus('⚠️ 尚未設定後端'); note('團主尚未完成設定，暫時無法送出訂單。'); return; }
+  if (!API) { setStatus('尚未開放', 'schedule'); note('團主尚未完成設定，暫時無法送出訂單。'); return; }
   await refresh();
   setInterval(() => { if (!document.hidden) refresh(); }, 20000);
 })();
