@@ -284,7 +284,7 @@ function save() {
   saving = saving.then(async () => {
     try {
       const r = await api('save', { id: myId, token: myToken, name: myNick || $('nick').value.trim(), items });
-      if (r.ok) { saveState = items.length ? '已送出，團主可在「全部彙整」看到，之後仍可修改。' : '已取消訂單。'; ls('submitted', items.length ? '1' : '0'); note(''); }
+      if (r.ok) { saveState = items.length ? '已送出，團主已收到，截團前仍可修改。' : '已取消訂單。'; ls('submitted', items.length ? '1' : '0'); note(''); }
       else if (r.error === 'closed') { saveState = '已截團，這次修改沒有送出。'; }
       else if (r.error === 'not_yet') { saveState = '還沒到開放時間，這次沒有送出。'; }
       else if (r.error === 'forbidden') { saveState = '無法修改這筆訂單，請聯絡團主。'; }
@@ -401,7 +401,7 @@ async function loginFromLink() {
   const k = decodeURIComponent(m[1]).trim().slice(0, 64);
   if (!API || !k) return;
   const prev = adminKey; adminKey = k;
-  try { const r = await api('adminCheck'); if (r.ok) { ls('drink_admin', k); renderAdmin(); note('已用邀請連結登入團主，設定在「全部彙整」頁。'); return; } } catch {}
+  try { const r = await api('adminCheck'); if (r.ok) { ls('drink_admin', k); renderAdmin(); note('已用邀請連結登入團主，設定在「團主專區」。'); return; } } catch {}
   adminKey = prev; note('團主邀請連結無效或已更換，請向系統管理員索取新連結。');
 }
 $('adminOut').onclick = () => { adminKey = ''; ls('drink_admin', null); renderAdmin(); };
